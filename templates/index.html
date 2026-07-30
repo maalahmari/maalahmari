@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-712124773"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-712124773');
+  </script>
+
+  <!-- Snap Pixel Code -->
+  <script type='text/javascript'>
+  (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
+  {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
+  a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
+  r.src=n;var u=t.getElementsByTagName(s)[0];
+  u.parentNode.insertBefore(r,u);})(window,document,
+  'https://sc-static.net/scevent.min.js');
+
+  snaptr('init', '1a588a86-d4d4-4844-b6d5-d9a9456d3cf4', {});
+
+  snaptr('track', 'PAGE_VIEW');
+  </script>
+  <!-- End Snap Pixel Code -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شاورمات — اطلب الآن</title>
+  <meta name="theme-color" content="#e85d04" />
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon-192.png') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-192.png') }}" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="شاورمات" />
+
+  <!-- SEO + WhatsApp/social sharing -->
+  <meta name="description" content="شاورمات — مطعم شاورما في الدمام، فرعا حي الزهور وحي أحد. شاورما دجاج طازجة، وجبات، وبروستد، مع توصيل سريع لأحياء الزهور والسلام وأحد وبدر. اطلب الآن." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="شاورمات" />
+  <meta property="og:title" content="شاورمات — شاورما الدمام، حي الزهور 🌯" />
+  <meta property="og:description" content="شاورما دجاج طازجة، وجبات، وبروستد — توصيل سريع لأحياء الزهور والسلام وأحد وبدر. اطلب الآن." />
+  <meta property="og:image" content="{{ url_for('static', filename='images/logo.webp', _external=True) }}" />
+  <meta property="og:locale" content="ar_SA" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="شاورمات — شاورما الدمام، حي الزهور 🌯" />
+  <meta name="twitter:description" content="شاورما دجاج طازجة، وجبات، وبروستد — توصيل سريع لأحياء الزهور والسلام وأحد وبدر." />
+  <meta name="twitter:image" content="{{ url_for('static', filename='images/logo.webp', _external=True) }}" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "شاورمات",
+    "image": "{{ url_for('static', filename='images/logo.webp', _external=True) }}",
+    "servesCuisine": "Shawarma",
+    "priceRange": "7–118 ريال",
+    "telephone": "+966138095999",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "حي الزهور",
+      "addressLocality": "الدمام",
+      "addressRegion": "المنطقة الشرقية",
+      "addressCountry": "SA"
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "15:00",
+      "closes": "02:00"
+    },
+    "hasMenu": {
+      "@type": "Menu",
+      "hasMenuSection": [
+        {
+          "@type": "MenuSection",
+          "name": "شاورما",
+          "hasMenuItem": [
+            { "@type": "MenuItem", "name": "شاورما ساندويش", "offers": { "@type": "Offer", "price": "7", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "صاروخ شاورما", "offers": { "@type": "Offer", "price": "13", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "شاورما جامبو", "offers": { "@type": "Offer", "price": "13", "priceCurrency": "SAR" } }
+          ]
+        },
+        {
+          "@type": "MenuSection",
+          "name": "الوجبات (شاورما + بطاطس + بيبسي)",
+          "hasMenuItem": [
+            { "@type": "MenuItem", "name": "وجبة شاورما واحدة", "offers": { "@type": "Offer", "price": "14", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "وجبة شاورمتين", "offers": { "@type": "Offer", "price": "20", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "وجبة ثلاث شاورما", "offers": { "@type": "Offer", "price": "26", "priceCurrency": "SAR" } }
+          ]
+        },
+        {
+          "@type": "MenuSection",
+          "name": "بروستد",
+          "hasMenuItem": [
+            { "@type": "MenuItem", "name": "بروستد 4 قطع", "offers": { "@type": "Offer", "price": "19", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "بروستد 8 قطع", "offers": { "@type": "Offer", "price": "36", "priceCurrency": "SAR" } }
+          ]
+        }
+      ]
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- Pass server data to JS -->
+  <script>
+    window.NEIGHBORHOOD_FEES = {{ neighborhood_fees | tojson }};
+    window.MENU_DATA = {{ menu | tojson }};
+    // Branch routing: the customer's neighborhood picks the branch (and its
+    // WhatsApp number + geofence centre). Adding a hood is a server-config change.
+    window.BRANCHES       = {{ branches | tojson }};
+    window.HOOD_TO_BRANCH = {{ hood_to_branch | tojson }};
+    window.DEFAULT_BRANCH = {{ default_branch | tojson }};
+  </script>
+
+  <!-- ══ SCREEN 1: Landing (hero) ═════════════ -->
+  <div id="screen-landing" class="screen-full">
+    <div class="landing-content">
+      <div class="landing-brand">
+        <img class="landing-logo" src="{{ url_for('static', filename='images/logo.webp') }}" alt="شاورمات" decoding="async" />
+        <h1>شاورمات</h1>
+        <p>الدمام — فرعا الزهور وأحد</p>
+        <span class="status-badge" id="openStatusLanding"></span>
+      </div>
+
+      <p class="landing-note">🏪 نفس أسعار المحل &nbsp;·&nbsp; 🚵 توصيل 5 ريال &nbsp;·&nbsp; ⏱ خلال ~30 دقيقة</p>
+
+      {# One large rotating meal photo. *_wide.webp are 3:2 crops centred on the
+         food — a shared ratio so the box doesn't jump height on each change.
+         Tapping adds whichever meal is showing; rotation freezes on touch so it
+         can't swap between press and release and add the wrong item. #}
+      <div class="hero-solo" id="heroSolo" role="button" tabindex="0"
+           onclick="heroSoloAdd()" aria-label="أضف الوجبة المعروضة للسلة">
+        <div class="hero-solo-stage">
+          <img class="hero-solo-img is-active" loading="eager" fetchpriority="high" decoding="async"
+               src="{{ url_for('static', filename=find_image('sw_meal_2_wide')) }}"
+               alt="وجبة ٢ شاورما" data-name="وجبة شاورمتين مايونيز" data-price="20" />
+          <img class="hero-solo-img" loading="eager" decoding="async"
+               src="{{ url_for('static', filename=find_image('broasted_meal_wide')) }}"
+               alt="وجبة بروستد" data-name="وجبة بروستد 4 قطع" data-price="22" />
+          <img class="hero-solo-img" loading="eager" decoding="async"
+               src="{{ url_for('static', filename=find_image('meal_family_10_wide')) }}"
+               alt="وجبة عائلية ١٠" data-name="وجبة عائلية 10 شاورما مايونيز" data-price="85"
+               data-badge="الأكثر طلباً" />
+          <span class="hero-solo-badge" id="heroSoloBadge" style="display:none"></span>
+        </div>
+        <div class="hero-solo-foot">
+          <span class="hero-solo-price" id="heroSoloPrice">20 ريال</span>
+          <span class="hero-solo-dots" id="heroSoloDots"></span>
+        </div>
+      </div>
+
+      <button class="btn-order-now" onclick="showMenuScreen()">🍔 اطلب الآن</button>
+
+      <button class="btn-install" id="installBtn" onclick="promptInstall()" style="display:none">📲 ثبّت التطبيق على جوالك</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 2: Menu ══════════════════ -->
+  <div id="screen-menu" style="display:none">
+
+    <header>
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-text">
+            <h1>شاورمات</h1>
+            <span class="hood-badge" id="hoodBadge"></span>
+            <span class="status-badge" id="openStatusHeader"></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="track-btn-header" id="trackBtnHeader" onclick="goTrackOrder()" style="display:none">📍 تتبع طلبك</button>
+          <button class="cart-btn" onclick="toggleCart()">
+            <span>🛍</span>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Promise bar -->
+    <div class="promise-bar">
+      <span class="promise-item">🏪 نفس أسعار المحل</span>
+      <span class="promise-sep"></span>
+      <span class="promise-item">🚵 توصيل 5 ريال فقط</span>
+      <span class="promise-sep"></span>
+      <span class="promise-item">⏱ خلال ~30 دقيقة</span>
+    </div>
+
+    <!-- Popular items -->
+    <div class="popular-section">
+      <h3 class="popular-title">🔥 الأكثر طلباً</h3>
+      <div class="popular-scroll">
+
+        <div class="pop-card" onclick="quickAddMeal('وجبة شاورمتين مايونيز', 20)">
+          <div class="pop-img loading">
+            <img loading="eager" fetchpriority="high" decoding="async" width="110" height="80"
+                 src="{{ url_for('static', filename=find_image('pepsi_meal')) }}" alt="وجبة شاورمتين"
+                 onload="this.parentNode.classList.remove('loading')" />
+          </div>
+          <div class="pop-body">
+            <div class="pop-name">وجبة شاورمتين</div>
+            <div class="pop-price">20 ريال</div>
+          </div>
+        </div>
+
+        <div class="pop-card" onclick="quickAdd('صاروخ مايونيز', 13, true)">
+          <div class="pop-img loading">
+            <img loading="eager" fetchpriority="high" decoding="async" width="110" height="80"
+                 src="{{ url_for('static', filename=find_image('rocket')) }}" alt="صاروخ"
+                 onload="this.parentNode.classList.remove('loading')" />
+          </div>
+          <div class="pop-body">
+            <div class="pop-name">صاروخ</div>
+            <div class="pop-price">13 ريال</div>
+          </div>
+        </div>
+
+        <div class="pop-card" onclick="quickAdd('جامبو مايونيز', 13, true)">
+          <div class="pop-img loading">
+            <img loading="eager" fetchpriority="high" decoding="async" width="110" height="80"
+                 src="{{ url_for('static', filename=find_image('jumbo')) }}" alt="جامبو"
+                 onload="this.parentNode.classList.remove('loading')" />
+          </div>
+          <div class="pop-body">
+            <div class="pop-name">جامبو</div>
+            <div class="pop-price">13 ريال</div>
+          </div>
+        </div>
+
+        <div class="pop-card" onclick="focusBroasted()">
+          <div class="pop-img loading">
+            <img loading="eager" fetchpriority="high" decoding="async" width="110" height="80"
+                 src="{{ url_for('static', filename=find_image('broasted')) }}" alt="بروستد"
+                 onload="this.parentNode.classList.remove('loading')" />
+          </div>
+          <div class="pop-body">
+            <div class="pop-name">بروستد</div>
+            <div class="pop-price">19 ريال</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Full menu -->
+    <div class="container">
+      <div class="section-divider">المنيو الكامل</div>
+
+      <div class="tabs">
+        <button class="tab active"  onclick="showCategory('shawarma', this)">🌯 شاورما</button>
+        <button class="tab"         onclick="showCategory('broasted', this)">🍗 بروستد</button>
+        <button class="tab"         onclick="showCategory('meals',    this)">🍟 وجبات</button>
+        <button class="tab"         onclick="showCategory('sides',    this)">🥙 جانبيات</button>
+        <button class="tab"         onclick="showCategory('drinks',   this)">🥤 مشروبات</button>
+      </div>
+
+      <!-- ═══ شاورما ═══════════════════ -->
+      <div id="cat-shawarma" class="conf-grid">
+
+        <!-- شاورما ساندويش -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('shawarma')) }}" alt="شاورما" />
+            <span class="hot-badge">الأكثر طلباً 🔥</span>
+          </div>
+          <div class="conf-body">
+            <h3>شاورما ساندويش</h3>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="sw-flavor">
+                <button class="chip active" data-val="مايونيز" data-price="7">مايونيز</button>
+                <button class="chip" data-val="ثوم"    data-price="7">ثوم</button>
+                <button class="chip" data-val="حراق"   data-price="7">حراق</button>
+                <button class="chip" data-val="حمص"    data-price="7">حمص</button>
+                <button class="chip" data-val="جبن"    data-price="7">جبن</button>
+                <button class="chip" data-val="مشكل"   data-price="8">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="sw-price">7 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('sw', -1)">−</button>
+                  <span id="sw-qty-val">1</span>
+                  <button onclick="changeCardQty('sw', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addSandwich()">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- صاروخ -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('rocket')) }}" alt="صاروخ" />
+          </div>
+          <div class="conf-body">
+            <h3>صاروخ شاورما</h3>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="rok-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="rok-price">13 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('rok', -1)">−</button>
+                  <span id="rok-qty-val">1</span>
+                  <button onclick="changeCardQty('rok', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addFlavorFixed('صاروخ', 13, 'rok-flavor', 'rok')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- جامبو شاورما -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('jumbo')) }}" alt="جامبو" />
+            <span class="hot-badge">الأكثر طلباً 🔥</span>
+          </div>
+          <div class="conf-body">
+            <h3>جامبو شاورما</h3>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="jmb-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="jmb-price">13 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('jmb', -1)">−</button>
+                  <span id="jmb-qty-val">1</span>
+                  <button onclick="changeCardQty('jmb', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addFlavorFixed('جامبو', 13, 'jmb-flavor', 'jmb')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- صحن شاورما -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('plate')) }}" alt="صحن شاورما" />
+          </div>
+          <div class="conf-body">
+            <h3>صحن شاورما</h3>
+            <div class="opt-group">
+              <div class="opt-label">الحجم</div>
+              <div class="chips" id="plate-size">
+                <button class="chip active" data-val="صغير" data-price="18">صغير — 18 ريال</button>
+                <button class="chip"        data-val="كبير"  data-price="25">كبير — 25 ريال</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="plate-price">18 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('plate', -1)">−</button>
+                  <span id="plate-qty-val">1</span>
+                  <button onclick="changeCardQty('plate', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMainConf('plate-size', 'plate', 'صحن شاورما')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- شاورما عربي -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img id="arabic-sw-img" loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('arabic')) }}" alt="شاورما عربي" />
+          </div>
+          <div class="conf-body">
+            <h3>شاورما عربي</h3>
+            <div class="opt-group">
+              <div class="opt-label">الحجم</div>
+              <div class="chips" id="arabic-sw-size">
+                <button class="chip active" data-val="مفرد" data-price="20" data-count="1" data-img="arabic">مفرد — 20 ريال</button>
+                <button class="chip"        data-val="دبل"  data-price="32" data-count="1" data-img="arabic_double">دبل — 32 ريال</button>
+              </div>
+            </div>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="arabic-sw-flavor">
+                <button class="chip active" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="arabic-sw-price">20 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('arabic-sw', -1)">−</button>
+                  <span id="arabic-sw-qty-val">1</span>
+                  <button onclick="changeCardQty('arabic-sw', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addArabicSwConf()">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cat-shawarma -->
+
+      <!-- ═══ بروستد ══════════════════ -->
+      <div id="cat-broasted" class="conf-grid" style="display:none">
+
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('broasted')) }}" alt="بروستد" />
+          </div>
+          <div class="conf-body">
+            <h3>بروستد</h3>
+            <div class="opt-group">
+              <div class="opt-label">الكمية</div>
+              <div class="chips" id="broasted-size">
+                <button class="chip active" data-val="4 قطع" data-price="19">4 قطع — 19 ريال</button>
+                <button class="chip"        data-val="8 قطع" data-price="36">8 قطع — 36 ريال</button>
+              </div>
+            </div>
+            <div class="opt-group">
+              <div class="opt-label">النوع</div>
+              <div class="chips" id="broasted-type">
+                <button class="chip active" data-val="عادي">عادي</button>
+                <button class="chip"        data-val="سبايسي">سبايسي 🌶</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="broasted-price">19 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('broasted', -1)">−</button>
+                  <span id="broasted-qty-val">1</span>
+                  <button onclick="changeCardQty('broasted', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addBroastedConf()">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cat-broasted -->
+
+      <!-- ═══ وجبات ════════════════ -->
+      <div id="cat-meals" class="conf-grid" style="display:none">
+
+        <!-- وجبة شاورما -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img id="sw-meal-img" loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('sw_meal_1')) }}" alt="وجبة شاورما" />
+            <span class="hot-badge">الأكثر طلباً 🔥</span>
+          </div>
+          <div class="conf-body">
+            <h3>وجبة شاورما</h3>
+            <p class="description">ساندويش + بطاطس + بيبسي</p>
+            <div class="opt-group">
+              <div class="opt-label">عدد الشاورما في الوجبة 🌯</div>
+              <div class="chips" id="sw-meal-size">
+                <button class="chip active" data-val="شاورما واحدة" data-price="14" data-count="1" data-img="sw_meal_1">شاورما واحدة — 14 ريال</button>
+                <button class="chip"        data-val="شاورمتين"     data-price="20" data-count="2" data-img="sw_meal_2">شاورمتين — 20 ريال</button>
+                <button class="chip"        data-val="ثلاث شاورما"   data-price="26" data-count="3" data-img="sw_meal_3">ثلاث شاورما — 26 ريال</button>
+              </div>
+            </div>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="sw-meal-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="sw-meal-price">14 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl" title="كم وجبة تبي؟">
+                  <button onclick="changeCardQty('sw-meal', -1)">−</button>
+                  <span id="sw-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('sw-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealFlavored('sw-meal-size','sw-meal-flavor','sw-meal','وجبة')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وجبة صاروخ -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('rocket_meal')) }}" alt="وجبة صاروخ" />
+          </div>
+          <div class="conf-body">
+            <h3>وجبة صاروخ</h3>
+            <p class="description">صاروخ شاورما + بطاطس + بيبسي</p>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="rocket-meal-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="rocket-meal-price">19 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('rocket-meal', -1)">−</button>
+                  <span id="rocket-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('rocket-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealFlavorFixed('وجبة صاروخ', 19, 'rocket-meal-flavor', 'rocket-meal')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وجبة جامبو -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('jumbo_meal')) }}" alt="وجبة جامبو" />
+          </div>
+          <div class="conf-body">
+            <h3>وجبة جامبو</h3>
+            <p class="description">جامبو شاورما + بطاطس + بيبسي</p>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="jumbo-meal-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="jumbo-meal-price">19 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('jumbo-meal', -1)">−</button>
+                  <span id="jumbo-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('jumbo-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealFlavorFixed('وجبة جامبو', 19, 'jumbo-meal-flavor', 'jumbo-meal')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وجبة عائلية -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img id="family-meal-img" loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('meal_family_10')) }}" alt="وجبة عائلية" />
+          </div>
+          <div class="conf-body">
+            <h3>وجبة عائلية</h3>
+            <p class="description">شاورما + 3 بطاطس + بيبسي عائلي</p>
+            <div class="opt-group">
+              <div class="opt-label">عدد الشاورما في الوجبة 🌯</div>
+              <div class="chips" id="family-meal-size">
+                <button class="chip active" data-val="10 شاورما" data-price="85"  data-count="10" data-img="meal_family_10">10 — 85 ريال</button>
+                <button class="chip"        data-val="15 شاورما" data-price="118" data-count="15" data-img="meal_family_15">15 — 118 ريال</button>
+              </div>
+            </div>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="family-meal-flavor">
+                <button class="chip active" data-val="مايونيز">مايونيز</button>
+                <button class="chip" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="family-meal-price">85 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('family-meal', -1)">−</button>
+                  <span id="family-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('family-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealFlavored('family-meal-size','family-meal-flavor','family-meal','وجبة عائلية')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وجبة شاورما عربي -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img id="arabic-meal-img" loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('arabic_meal')) }}" alt="وجبة شاورما عربي" />
+          </div>
+          <div class="conf-body">
+            <h3>وجبة شاورما عربي</h3>
+            <p class="description">بالخبز العربي + بطاطس + بيبسي</p>
+            <div class="opt-group">
+              <div class="opt-label">الحجم</div>
+              <div class="chips" id="arabic-meal-size">
+                <button class="chip active" data-val="مفرد" data-price="22" data-count="1" data-img="arabic_meal">مفرد — 22 ريال</button>
+                <button class="chip"        data-val="دبل"  data-price="34" data-count="1" data-img="arabic_meal_double">دبل — 34 ريال</button>
+              </div>
+            </div>
+            <div class="opt-group">
+              <div class="opt-label">النكهة</div>
+              <div class="chips" id="arabic-meal-flavor">
+                <button class="chip active" data-val="ثوم">ثوم</button>
+                <button class="chip" data-val="حراق">حراق</button>
+                <button class="chip" data-val="جبن">جبن</button>
+                <button class="chip" data-val="حمص">حمص</button>
+                <button class="chip" data-val="مشكل">مشكل</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="arabic-meal-price">22 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('arabic-meal', -1)">−</button>
+                  <span id="arabic-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('arabic-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealFlavored('arabic-meal-size','arabic-meal-flavor','arabic-meal','وجبة شاورما عربي')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وجبة بروستد -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('broasted_meal')) }}" alt="وجبة بروستد" />
+          </div>
+          <div class="conf-body">
+            <h3>وجبة بروستد</h3>
+            <p class="description">بروستد + بيبسي</p>
+            <div class="opt-group">
+              <div class="opt-label">الكمية</div>
+              <div class="chips" id="broasted-meal-size">
+                <button class="chip active" data-val="4 قطع" data-price="22">4 قطع — 22 ريال</button>
+                <button class="chip"        data-val="8 قطع" data-price="38">8 قطع — 38 ريال</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="broasted-meal-price">22 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('broasted-meal', -1)">−</button>
+                  <span id="broasted-meal-qty-val">1</span>
+                  <button onclick="changeCardQty('broasted-meal', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addMealConf('broasted-meal-size','broasted-meal','وجبة بروستد')">أضف للسلة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cat-meals -->
+
+      <!-- ═══ جانبيات ════════════════ -->
+      <div id="cat-sides" class="conf-grid" style="display:none">
+
+        <!-- بطاطس -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('fries')) }}" alt="بطاطس" />
+          </div>
+          <div class="conf-body">
+            <h3>بطاطس</h3>
+            <p class="description">بطاطس مقلية</p>
+            <div class="opt-group">
+              <div class="opt-label">الحجم</div>
+              <div class="chips" id="fries-size">
+                <button class="chip active" data-val="صغير" data-price="5">صغير — 5 ريال</button>
+                <button class="chip"        data-val="كبير"  data-price="10">كبير — 10 ريال</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="fries-price">5 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('fries', -1)">−</button>
+                  <span id="fries-qty-val">1</span>
+                  <button onclick="changeCardQty('fries', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addExtraConf('fries-size','fries','بطاطس')">أضف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- صوصات -->
+        <div class="conf-card">
+          <div class="conf-img conf-img--placeholder">🥣</div>
+          <div class="conf-body">
+            <h3>صوص</h3>
+            <div class="opt-group">
+              <div class="opt-label">النوع</div>
+              <div class="chips" id="sauce-type">
+                <button class="chip active" data-val="ثوم"    data-price="2">ثوم — 2 ريال</button>
+                <button class="chip"        data-val="سبايسي" data-price="2">سبايسي — 2 ريال</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price" id="sauce-price">2 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('sauce', -1)">−</button>
+                  <span id="sauce-qty-val">1</span>
+                  <button onclick="changeCardQty('sauce', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addExtraConf('sauce-type','sauce','علبة')">أضف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- حمص -->
+        <div class="conf-card">
+          <div class="conf-img">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('hummus')) }}" alt="حمص" />
+          </div>
+          <div class="conf-body">
+            <h3>علبة حمص</h3>
+            <p class="description">حمص طازج</p>
+            <div class="conf-footer" style="margin-top:auto">
+              <span class="conf-price">7 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('hummus', -1)">−</button>
+                  <span id="hummus-qty-val">1</span>
+                  <button onclick="changeCardQty('hummus', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addExtraSimple('علبة حمص', 7, 'hummus')">أضف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cat-sides -->
+
+      <!-- ═══ مشروبات ═════════════════ -->
+      <div id="cat-drinks" class="conf-grid" style="display:none">
+
+        <div class="conf-card">
+          <div class="conf-img">
+            <img id="drink-img" loading="lazy" decoding="async" src="{{ url_for('static', filename=find_image('pepsi')) }}" alt="مشروب غازي" />
+          </div>
+          <div class="conf-body">
+            <h3>مشروب غازي</h3>
+            <div class="opt-group">
+              <div class="opt-label">النوع</div>
+              <div class="chips" id="drink-flavor">
+                <button class="chip active" data-val="بيبسي"      data-img="pepsi">بيبسي</button>
+                <button class="chip" data-val="بيبسي دايت"  data-img="pepsi_diet">بيبسي دايت</button>
+                <button class="chip" data-val="ميرندا"       data-img="mirinda">ميرندا</button>
+                <button class="chip" data-val="سفن أب"       data-img="7up">سفن أب</button>
+                <button class="chip" data-val="سفن أب دايت" data-img="7up_diet">سفن أب دايت</button>
+              </div>
+            </div>
+            <div class="conf-footer">
+              <span class="conf-price">4 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('drink', -1)">−</button>
+                  <span id="drink-qty-val">1</span>
+                  <button onclick="changeCardQty('drink', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addDrinkConf()">أضف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="conf-card">
+          <div class="conf-img conf-img--placeholder">💧</div>
+          <div class="conf-body">
+            <h3>ماء معدني</h3>
+            <div class="conf-footer" style="margin-top:auto">
+              <span class="conf-price">1 ريال</span>
+              <div class="conf-actions">
+                <div class="qty-ctrl">
+                  <button onclick="changeCardQty('water', -1)">−</button>
+                  <span id="water-qty-val">1</span>
+                  <button onclick="changeCardQty('water', 1)">+</button>
+                </div>
+                <button class="add-btn-full" onclick="addExtraSimple('ماء معدني', 1, 'water')">أضف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cat-drinks -->
+
+    </div><!-- /container -->
+
+    <footer>
+      <p>© شاورمات — الدمام، فرعا حي الزهور وحي أحد</p>
+      <p style="margin-top:.35rem">
+        ☎️ <a href="tel:0138095999">اتصال: 0138095999</a>
+        &nbsp;·&nbsp;
+        💬 <a href="https://wa.me/966533647130" target="_blank" rel="noopener">واتساب: 0533647130</a>
+      </p>
+    </footer>
+
+  </div><!-- /screen-menu -->
+
+  <!-- ══ NEIGHBORHOOD PICKER ══════════════ -->
+  <div class="sheet-overlay" id="hoodOverlay" onclick="closeHoodPicker()"></div>
+  <div class="bottom-sheet" id="hoodSheet">
+    <div class="sheet-handle"></div>
+    <h2 class="sheet-title">توصيل ولا استلام؟</h2>
+    <div class="hood-grid">
+      {# Every branch's hoods in one flat list — the customer picks their own
+         neighborhood and never sees which branch serves it. #}
+      {% for hood, fee in neighborhood_fees.items() %}
+      <button class="hood-btn" onclick="selectHood('{{ hood }}', {{ fee }})">📍 حي {{ hood }} <span class="hood-fee">{{ fee }}ريال</span></button>
+      {% endfor %}
+      {# Pickup is the one case with no hood to infer the branch from. #}
+      {% for bid, br in branches.items() %}
+      <button class="hood-btn pickup-btn" onclick="selectPickup('{{ bid }}')">🏪 استلام — {{ br.name }} <span class="hood-fee">بدون رسوم توصيل</span></button>
+      {% endfor %}
+      <button class="hood-btn hood-other" onclick="showOutOfRange()">📍 حي آخر</button>
+    </div>
+  </div>
+
+  <!-- Out of range -->
+  <div class="modal-overlay" id="outOfRangeModal">
+    <div class="modal modal-small">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">😕</div>
+      <h2 id="rangeModalTitle">خارج نطاق التوصيل</h2>
+      <p id="rangeModalMsg" style="color:var(--muted);margin:.75rem 0 1.5rem;font-size:.9rem">
+        نوصّل حالياً لـ: حي {{ neighborhood_fees.keys() | join('، حي ') }} فقط
+      </p>
+      <a href="https://wa.me/966533647130" class="btn-primary w-full"
+         style="display:block;text-align:center;padding:.8rem">
+        تواصل عبر واتساب 📱
+      </a>
+      <button onclick="closeOutOfRange()"
+              style="display:block;width:100%;background:none;border:none;color:var(--muted);padding:.75rem;cursor:pointer;margin-top:.5rem;font-family:inherit">
+        رجوع
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ UPSELL: Fries ══════════════ -->
+  <div class="modal-overlay" id="upsellFriesModal">
+    <div class="modal modal-small">
+      <button class="modal-x" onclick="closeAllUpsells()" aria-label="إغلاق">✕</button>
+      <div class="upsell-emoji">🍟</div>
+      <h2>تضيف بطاطس؟</h2>
+      <p style="color:var(--muted);font-size:.85rem;margin:.3rem 0 1rem">أغلب العملاء يضيفونها</p>
+      <div class="chips" id="upsell-fries-chips" style="justify-content:center;margin-bottom:1rem">
+        <button class="chip active" data-val="صغير" data-price="5">صغير — 5 ريال</button>
+        <button class="chip"        data-val="كبير"  data-price="10">كبير — 10 ريال</button>
+      </div>
+      <button class="btn-primary w-full" onclick="addUpsellFries()">➕ أضف بطاطس</button>
+      <button class="skip-btn" onclick="showDrinkUpsell()">لا شكراً ←</button>
+    </div>
+  </div>
+
+  <!-- ══ UPSELL: Drink ══════════════ -->
+  <div class="modal-overlay" id="upsellDrinkModal">
+    <div class="modal modal-small">
+      <button class="modal-x" onclick="closeAllUpsells()" aria-label="إغلاق">✕</button>
+      <div class="upsell-emoji">🥤</div>
+      <h2>مشروب؟</h2>
+      <div class="chips" id="upsell-drink-chips" style="justify-content:center;margin:1rem 0">
+        <button class="chip active" data-val="بيبسي"       data-price="4">بيبسي — 4 ريال</button>
+        <button class="chip"        data-val="بيبسي دايت"  data-price="4">بيبسي دايت — 4 ريال</button>
+        <button class="chip"        data-val="ميرندا"      data-price="4">ميرندا — 4 ريال</button>
+        <button class="chip"        data-val="سفن أب"      data-price="4">سفن أب — 4 ريال</button>
+        <button class="chip"        data-val="سفن أب دايت" data-price="4">سفن أب دايت — 4 ريال</button>
+      </div>
+      <button class="btn-primary w-full" onclick="addUpsellDrink()">➕ أضف مشروب</button>
+      <button class="skip-btn" onclick="closeUpsellDrink()">لا شكراً</button>
+    </div>
+  </div>
+
+  <!-- ══ UPSELL: Meal fries upgrade ══════ -->
+  <div class="modal-overlay" id="upsellMealFriesModal">
+    <div class="modal modal-small">
+      <button class="modal-x" onclick="closeAllUpsells()" aria-label="إغلاق">✕</button>
+      <div class="upsell-emoji">🍟</div>
+      <h2>تكبّر البطاطس؟</h2>
+      <p id="mealFriesSubtitle" style="color:var(--muted);font-size:.85rem;margin:.3rem 0 1rem">ترقية من صغير لكبير — 5 ريال فقط</p>
+      <div id="mealFriesQtyRow" class="qty-controls" style="display:none;justify-content:center;align-items:center;gap:1.2rem;margin:0 0 1rem">
+        <button type="button" class="qty-btn" onclick="changeMealFriesQty(-1)" aria-label="أقل">−</button>
+        <span id="mealFriesQtyVal" style="font-weight:800;font-size:1.15rem;min-width:1.5rem;text-align:center">1</span>
+        <button type="button" class="qty-btn" onclick="changeMealFriesQty(1)" aria-label="أكثر">+</button>
+      </div>
+      <button class="btn-primary w-full" id="mealFriesAddBtn" onclick="addMealFriesUpgrade()">➕ كبّر البطاطس — 5 ريال</button>
+      <button class="skip-btn" onclick="showMealSauceUpsell()">لا شكراً ←</button>
+    </div>
+  </div>
+
+  <!-- ══ UPSELL: Meal sauce ══════════ -->
+  <div class="modal-overlay" id="upsellMealSauceModal">
+    <div class="modal modal-small">
+      <button class="modal-x" onclick="closeAllUpsells()" aria-label="إغلاق">✕</button>
+      <div class="upsell-emoji">🥣</div>
+      <h2>تضيف صوص؟</h2>
+      <p style="color:var(--muted);font-size:.85rem;margin:.3rem 0 1rem">2 ريال فقط</p>
+      <div class="chips" id="upsell-meal-sauce-chips" style="justify-content:center;margin-bottom:1rem">
+        <button class="chip active" data-val="ثوم"    data-price="2">ثوم — 2 ريال</button>
+        <button class="chip"        data-val="سبايسي" data-price="2">سبايسي — 2 ريال</button>
+      </div>
+      <button class="btn-primary w-full" onclick="addUpsellMealSauce()">➕ أضف صوص</button>
+      <button class="skip-btn" onclick="closeMealSauceUpsell()">لا شكراً</button>
+    </div>
+  </div>
+
+  <!-- ══ CART SIDEBAR ═══════════════ -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>طلبك</h2>
+      <button class="close-btn" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="empty-msg">السلة فارغة</p>
+    </div>
+    <div class="loyalty-bar" id="loyaltyBar"></div>
+    <div class="cart-total" id="cartTotal" style="display:none">
+      <div class="total-row"><span>المجموع</span><span id="subtotalVal">0 ريال</span></div>
+      <div class="total-row"><span id="deliveryLabel">التوصيل</span><span id="deliveryVal">5 ريال</span></div>
+      <div class="total-row total-bold"><span>الإجمالي</span><span id="totalVal">0 ريال</span></div>
+    </div>
+    <p id="promoNote" class="promo-note" style="display:none"></p>
+    <div class="cart-actions" id="cartActions" style="display:none">
+      <p id="minOrderNote" style="display:none;background:#fff3e0;color:#b45309;border-radius:8px;padding:.55rem .8rem;font-size:.85rem;margin:0 0 .6rem;text-align:center;line-height:1.5"></p>
+      <button class="btn-primary w-full" id="checkoutBtn" onclick="startCheckout()">إتمام الطلب ←</button>
+    </div>
+  </aside>
+
+  <!-- ══ ORDER FORM ═══════════════ -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>بيانات التوصيل</h2>
+        <button class="close-btn" onclick="closeOrderForm()">✕</button>
+      </div>
+      <form id="orderForm" onsubmit="submitOrder(event)">
+        <label>الاسم *
+          <input type="text" id="custName" placeholder="محمد أحمد" required />
+        </label>
+        <label>رقم الجوال *
+          <input type="tel" id="custPhone" placeholder="05XXXXXXXX" required />
+        </label>
+        <input type="hidden" id="custAddress" value="" />
+        <p id="locationNote" style="background:#e8f5e9;color:#1b5e20;border-radius:10px;padding:.7rem .9rem;font-size:.85rem;margin:.25rem 0 .5rem;line-height:1.5">
+          📍 موقعك سيُرسل عبر واتساب بعد التأكيد — لا حاجة لكتابة العنوان هنا
+        </p>
+        <label>ملاحظات
+          <textarea id="custNote" placeholder="أي تعليمات خاصة…" rows="2"></textarea>
+        </label>
+
+        <div class="promo-box" style="background:#fff7ed;border:2px solid var(--primary);border-radius:12px;padding:.75rem .8rem;margin:0 0 1rem">
+          <div style="font-weight:800;color:var(--primary-d);margin-bottom:.5rem;font-size:.92rem">🎁 عندك كود عرض من بقالة؟</div>
+          <div style="display:flex;gap:.5rem">
+            <input type="text" id="promoCodeInput" placeholder="اكتب الكود هنا" style="flex:1;text-transform:uppercase;padding:.6rem;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:.95rem" />
+            <button type="button" class="btn-primary" id="promoApplyBtn" onclick="applyPromoCode()" style="white-space:nowrap">تطبيق</button>
+          </div>
+          <p id="promoMsg" style="display:none;font-size:.85rem;margin:.5rem 0 0;font-weight:700"></p>
+        </div>
+        <p id="promoGiftLine" style="display:none;background:#faf5ff;color:#6b21a8;border-radius:8px;padding:.6rem .8rem;font-size:.9rem;font-weight:800;margin:-.4rem 0 1rem;text-align:center"></p>
+
+        <div class="modal-summary" id="modalSummary"></div>
+
+        <button type="submit" class="btn-primary w-full" id="submitBtn" style="background:#25D366">📲 تأكيد الطلب عبر واتساب</button>
+        <p class="payment-note">💵 الدفع عند الاستلام · يكتمل الطلب بإرسال الرسالة في واتساب</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ SUCCESS ═════════════════ -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal modal-small">
+      <div class="success-icon" id="successIcon">📲</div>
+      <h2 id="successTitle">خطوة أخيرة! 📲</h2>
+      <p id="successMsg"></p>
+      <a id="successTrackLink" href="#" class="track-order-link" style="display:none">
+        تتبع طلبك ←
+      </a>
+      <a id="successWaBtn" href="#" target="_blank"
+         style="display:none;background:#25D366;color:#fff;border-radius:12px;padding:.85rem;font-size:1rem;font-weight:700;text-align:center;text-decoration:none;margin:.75rem 0 .25rem;width:100%;box-sizing:border-box">
+        📲 أرسل طلبك عبر واتساب
+      </a>
+      <button class="btn-primary w-full" onclick="closeSuccess()">حسناً</button>
+    </div>
+  </div>
+
+  <!-- iOS install hint (shown only on iPhone/iPad Safari, once) -->
+  <div class="ios-install-banner" id="iosInstallBanner" style="display:none">
+    <button class="ios-banner-close" onclick="dismissIosHint()">✕</button>
+    <div class="ios-banner-text">
+      <strong>📲 ثبّت تطبيق شاورمات</strong>
+      اضغط زر المشاركة <span class="ios-share-icon">⎋</span> بالأسفل ثم اختر «إضافة إلى الشاشة الرئيسية»
+    </div>
+  </div>
+
+
+  <!-- ══ CHATBOT ═════════════════ -->
+  <!-- Flex row so the bubble sits vertically centred on شيفو regardless of his
+       size at each breakpoint, instead of two independently-positioned fixed
+       elements that would need re-tuning every time --fab-size changes. -->
+  <div class="chat-widget" id="chatWidget">
+    <!-- شيفو first in DOM order: under dir="rtl" a row flex-container starts
+         at the right, so he stays hugging the corner and the bubble (below)
+         sits further in, to his left, pointing back at him. -->
+    <button class="chat-fab" id="chatFab" onclick="toggleChat()" title="المساعد الرقمي">
+      <img class="chat-fab-logo" src="{{ url_for('static', filename='images/shaifu.svg') }}" alt="شيفو">
+      <span class="chat-fab-text">كلّم شيفو</span>
+    </button>
+    <!-- شيفو "talking": a speech bubble that appears on its own to draw the
+         eye, separate from the fab so it can be dismissed without hiding
+         شيفو himself. -->
+    <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+      <button class="chat-bubble-x" onclick="event.stopPropagation(); dismissChatBubble();" aria-label="إغلاق">✕</button>
+      <span id="chatBubbleText"></span>
+    </div>
+  </div>
+
+  <!-- Added-to-cart toast -->
+  <div id="addedToast" style="
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#1a1a2e;color:#fff;border-radius:999px;padding:.55rem 1.2rem;
+    font-size:.9rem;font-weight:600;opacity:0;pointer-events:none;
+    transition:opacity .25s,transform .25s;z-index:9999;white-space:nowrap;
+    box-shadow:0 4px 16px rgba(0,0,0,.3)">
+    ✅ أُضيف للسلة
+  </div>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-panel-header">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <img class="chat-header-logo" src="{{ url_for('static', filename='images/shaifu.svg') }}" alt="شيفو">
+        <div>
+          <h3>شيفو</h3>
+          <span>مساعدك الذكي 🤖🌯</span>
+        </div>
+      </div>
+      <button class="chat-close-btn" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-quick-replies" id="chatQuickReplies"></div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" type="text" placeholder="اكتب سؤالك…" />
+      <button class="chat-send-btn" onclick="sendChatMessage()">إرسال</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
