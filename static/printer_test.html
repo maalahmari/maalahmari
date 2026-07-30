@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>تجربة طابعة شاورمات (TSPL)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; background: #f3f4f6; color: #111; padding: 14px; line-height: 1.5; }
+    h1 { font-size: 22px; color: #d32027; margin-bottom: 4px; }
+    .sub { font-size: 13px; color: #555; margin-bottom: 14px; }
+    .btn { display: block; width: 100%; border: none; border-radius: 12px; padding: 16px; font-size: 18px; font-weight: 800; color: #fff; font-family: inherit; cursor: pointer; margin-bottom: 10px; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.4; }
+    #btnConnect { background: #2563eb; }
+    .btn.tspl { background: #7c3aed; }
+    .btn.tag  { background: #d32027; }
+    .btn.cal  { background: #b45309; }
+    .btn.esc  { background: #059669; }
+    .grp { border: 2px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 12px; background:#fff; }
+    .grp h3 { font-size: 14px; margin-bottom: 8px; color:#374151; }
+    .grp label { display:block; font-size:13px; margin-bottom:6px; }
+    .status { font-size: 15px; font-weight: 800; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; text-align: center; }
+    .status.off { background: #fde2e2; color: #b91c1c; }
+    .status.on  { background: #dcfce7; color: #166534; }
+    #charPicker { font-size:12px; }
+    #charPicker label { direction:ltr; text-align:left; padding:3px; }
+    .log { background: #0b1020; color: #b9f5c9; font-family: ui-monospace, Consolas, monospace; font-size: 12px; line-height: 1.45; direction: ltr; text-align: left; padding: 12px; border-radius: 10px; height: 280px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    .log .err { color: #ff8080; } .log .ok { color: #80ff9e; } .log .info{ color: #87b6ff; }
+    canvas { display: none; }
+    .hint { font-size: 12px; color: #666; margin: 4px 0 12px; }
+    input[type=range]{ width:60%; vertical-align:middle; }
+  </style>
+</head>
+<body>
+  <h1>🖨 تجربة طابعة شاورمات</h1>
+  <div class="sub">ضبط TSPL — السواد والفراغ</div>
+
+  <div id="status" class="status off">غير متصل</div>
+  <button id="btnConnect" class="btn">١) اتصال بالطابعة (بلوتوث)</button>
+
+  <div class="grp" id="charBox" style="display:none">
+    <h3>قناة الكتابة:</h3>
+    <div id="charPicker"></div>
+  </div>
+
+  <div class="grp">
+    <h3>⚙️ إعدادات TSPL:</h3>
+    <label><input type="radio" name="gap" value="gap" checked> ملصقات بفراغ (die-cut) — GAP 3mm</label>
+    <label><input type="radio" name="gap" value="cont"> ورق متصل — GAP 0</label>
+    <label style="margin-top:6px">السواد DENSITY: <input id="density" type="range" min="4" max="15" value="15"> <b id="densVal">15</b></label>
+  </div>
+
+  <div class="grp">
+    <h3>٢) اختبارات TSPL:</h3>
+    <button id="btnCal" class="btn cal" disabled>⚙ معايرة الورق (GAPDETECT)</button>
+    <button id="btnTsplText" class="btn tspl" disabled>اختبار TSPL (نص)</button>
+    <button id="btnTsplTag" class="btn tag" disabled>بطاقة عربية (TSPL صورة)</button>
+  </div>
+
+  <div class="grp">
+    <h3>✅ ESC/POS (اللغة الشغّالة):</h3>
+    <button id="btnEscText" class="btn esc" disabled>اختبار ESC/POS (نص)</button>
+    <button id="btnEscBox" class="btn esc" disabled>مربع أسود (اختبار صورة)</button>
+    <button id="btnEscTag" class="btn esc" disabled>بطاقة عربية (ESC/POS صورة)</button>
+  </div>
+
+  <div class="hint">لو الموضع غلط: شغّل "معايرة الورق" مرة، أو سوّي معايرة بزر الورق على الطابعة (اضغط مطوّل).</div>
+  <div id="log" class="log"></div>
+  <canvas id="cv"></canvas>
+
+<script>
+"use strict";
+
+const logEl = document.getElementById('log');
+function log(msg, cls){
+  const t = new Date().toLocaleTimeString('en-GB');
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = `[${t}] ${msg}`;
+  logEl.appendChild(line); logEl.scrollTop = logEl.scrollHeight;
+}
+function setStatus(text, on){
+  const s = document.getElementById('status');
+  s.textContent = text; s.className = 'status ' + (on ? 'on' : 'off');
+}
+const TEST_BTNS = ['btnCal','btnTsplText','btnTsplTag','btnEscText','btnEscBox','btnEscTag'];
+function enableTests(on){ TEST_BTNS.forEach(id=>document.getElementById(id).disabled=!on); }
+
+const CANDIDATE_SERVICES = [
+  '000018f0-0000-1000-8000-00805f9b34fb','0000ff00-0000-1000-8000-00805f9b34fb',
+  '0000ffe0-0000-1000-8000-00805f9b34fb','0000ffe5-0000-1000-8000-00805f9b34fb',
+  '0000fff0-0000-1000-8000-00805f9b34fb','0000ff80-0000-1000-8000-00805f9b34fb',
+  '0000fee7-0000-1000-8000-00805f9b34fb','0000fd00-0000-1000-8000-00805f9b34fb',
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+  '0000180a-0000-1000-8000-00805f9b34fb'
+];
+
+let device = null, writableChars = [], selectedIdx = 0;
+
+async function connect(){
+  if (!navigator.bluetooth){ log('المتصفح لا يدعم Web Bluetooth. استخدم Chrome.', 'err'); setStatus('غير مدعوم', false); return; }
+  try{
+    log('اختر الطابعة...', 'info');
+    device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: CANDIDATE_SERVICES });
+    log('الجهاز: ' + (device.name || '(بدون اسم)'), 'ok');
+    device.addEventListener('gattserverdisconnected', () => {
+      log('انقطع الاتصال.', 'err'); setStatus('انقطع الاتصال', false); writableChars=[]; enableTests(false);
+    });
+    const server = await device.gatt.connect();
+    log('متصل GATT. فحص الخدمات...', 'ok');
+    const services = await server.getPrimaryServices();
+    writableChars = [];
+    for (const svc of services){
+      let chars=[]; try{ chars=await svc.getCharacteristics(); }catch(e){ continue; }
+      for (const ch of chars){
+        const p=ch.properties;
+        if (p.write||p.writeWithoutResponse){
+          writableChars.push({uuid:ch.uuid, char:ch, nr:p.writeWithoutResponse});
+          log('قناة كتابة: '+ch.uuid+(p.writeWithoutResponse?' (NR)':' (W)'), 'ok');
+        }
+      }
+    }
+    if (!writableChars.length){ log('لا توجد قناة كتابة!', 'err'); setStatus('بدون قناة', false); return; }
+    selectedIdx = 0;
+    const pref = writableChars.findIndex(w=>/fff2/.test(w.uuid)); if (pref>=0) selectedIdx=pref;
+    renderCharPicker();
+    document.getElementById('charBox').style.display='block';
+    setStatus('✅ متصل — جرّب', true); enableTests(true);
+    log('القناة: '+writableChars[selectedIdx].uuid, 'info');
+  }catch(e){ log('خطأ اتصال: '+e.message, 'err'); setStatus('فشل الاتصال', false); }
+}
+
+function renderCharPicker(){
+  const box=document.getElementById('charPicker'); box.innerHTML='';
+  writableChars.forEach((w,idx)=>{
+    const lab=document.createElement('label');
+    lab.innerHTML=`<input type="radio" name="wc" value="${idx}" ${idx===selectedIdx?'checked':''}> ${w.uuid} ${w.nr?'(NR)':'(W)'}`;
+    box.appendChild(lab);
+  });
+  box.onchange=(e)=>{ if(e.target.name==='wc'){ selectedIdx=+e.target.value; log('القناة: '+writableChars[selectedIdx].uuid,'info'); } };
+}
+
+async function sendBytes(bytes){
+  const w=writableChars[selectedIdx]; if(!w){ log('لا قناة.','err'); return; }
+  const CHUNK=180, useNR=w.nr; let sent=0;
+  for (let i=0;i<bytes.length;i+=CHUNK){
+    const chunk=bytes.slice(i,i+CHUNK);
+    if (useNR) await w.char.writeValueWithoutResponse(chunk); else await w.char.writeValue(chunk);
+    sent+=chunk.length;
+    if (i%(CHUNK*25)===0) log('إرسال... '+sent+'/'+bytes.length);
+    if (useNR) await new Promise(r=>setTimeout(r,6));
+  }
+  log('تم إرسال '+sent+' بايت', 'ok');
+}
+
+const enc=new TextEncoder();
+function S(s){ return enc.encode(s); }
+function concat(arr){ let n=arr.reduce((a,b)=>a+b.length,0); const o=new Uint8Array(n); let off=0; for(const a of arr){o.set(a,off);off+=a.length;} return o; }
+
+// ====== إعدادات TSPL من الواجهة ======
+function gapCmd(){
+  const m=(document.querySelector('input[name=gap]:checked')||{}).value||'gap';
+  return m==='gap' ? 'GAP 3 mm,0 mm' : 'GAP 0,0';
+}
+function density(){ return document.getElementById('density').value; }
+function tsplHeader(){
+  return 'SIZE 4,6\r\n'+gapCmd()+'\r\nDENSITY '+density()+'\r\nSPEED 4\r\nDIRECTION 1\r\nREFERENCE 0,0\r\nCLS\r\n';
+}
+
+// ====== معايرة ======
+async function calibrate(){
+  log('— معايرة GAPDETECT —', 'info');
+  const cmd='SIZE 4,6\r\n'+gapCmd()+'\r\nDENSITY '+density()+'\r\nSPEED 4\r\nGAPDETECT\r\n';
+  try{ await sendBytes(S(cmd)); log('انتهت المعايرة (تطلع ملصق أو اثنين).', 'ok'); }
+  catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+
+// ====== TSPL نص ======
+async function tsplText(){
+  log('— TSPL نص (DENSITY='+density()+', '+gapCmd()+') —', 'info');
+  const cmd=tsplHeader()+
+    'TEXT 40,40,"4",0,2,2,"SHAWERMAT"\r\n'+
+    'TEXT 40,170,"3",0,1,1,"TSPL TEST OK"\r\n'+
+    'TEXT 40,240,"3",0,1,1,"Order #999"\r\n'+
+    'BAR 40,320,560,10\r\n'+
+    'BOX 30,30,780,420,4\r\n'+
+    'PRINT 1,1\r\n';
+  try{ await sendBytes(S(cmd)); log('انتهى. طبع؟', 'ok'); }
+  catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+
+// ====== رسم بطاقة ======
+function renderTagCanvas(W){
+  const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  cv.width=W; cv.height=1500;
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,1500);
+  ctx.fillStyle='#000'; ctx.direction='rtl'; ctx.textAlign='right'; ctx.textBaseline='top';
+  const R=W-24; let y=20;
+  const f=(px,wt)=>(wt||700)+' '+px+'px Cairo, Tahoma, sans-serif';
+  function line(t,px,wt){ ctx.font=f(px,wt); ctx.fillText(t,R,y); y+=px+12; }
+  function rule(){ ctx.fillRect(16,y,W-32,3); y+=14; }
+  ctx.textAlign='center';
+  ctx.font=f(Math.round(W*0.10),900); ctx.fillText('شاورمات',W/2,y); y+=Math.round(W*0.12);
+  ctx.font=f(Math.round(W*0.035),600); ctx.fillText('الدمام — حي الزهور · 0533647130',W/2,y); y+=Math.round(W*0.06);
+  ctx.textAlign='right'; rule();
+  ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeRect(30,y,W-60,Math.round(W*0.13));
+  ctx.font=f(Math.round(W*0.085),900); ctx.fillText('طلب #999',W/2,y+12); y+=Math.round(W*0.16);
+  ctx.textAlign='right';
+  line('الاسم: محمد العنزي',Math.round(W*0.045),700);
+  line('الجوال: 0501234567',Math.round(W*0.045),700);
+  line('الحي: الزهور',Math.round(W*0.045),700); rule();
+  line('الطلبات:',Math.round(W*0.05),800);
+  line('2× شاورما عربي — 24 ريال',Math.round(W*0.045),600);
+  line('1× بروستد سبايسي — 18 ريال',Math.round(W*0.045),600);
+  line('1× بيبسي — 4 ريال',Math.round(W*0.045),600); rule();
+  line('التوصيل: مجاني',Math.round(W*0.045),700);
+  ctx.font=f(Math.round(W*0.065),900); ctx.fillText('الإجمالي: 46 ريال',R,y); y+=Math.round(W*0.09); rule();
+  ctx.textAlign='center'; ctx.font=f(Math.round(W*0.035),600); ctx.fillText('شكراً لطلبكم',W/2,y); y+=Math.round(W*0.06);
+  const H=Math.ceil((y+16)/8)*8;
+  const out=document.createElement('canvas'); out.width=W; out.height=H;
+  const o=out.getContext('2d'); o.fillStyle='#fff'; o.fillRect(0,0,W,H); o.drawImage(cv,0,0);
+  return out;
+}
+function canvasToMono(canvas){
+  const w=canvas.width,h=canvas.height;
+  const d=canvas.getContext('2d').getImageData(0,0,w,h).data;
+  const black=new Uint8Array(w*h);
+  for(let i=0,p=0;p<w*h;p++,i+=4){ const lum=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; black[p]=lum<128?1:0; }
+  return {w,h,black};
+}
+
+// ====== بطاقة TSPL (BITMAP bit0=أسود) ======
+async function tsplTag(){
+  log('— بطاقة TSPL —', 'info');
+  const canvas=renderTagCanvas(800);
+  const {w,h,black}=canvasToMono(canvas);
+  const wb=w/8; const bmp=new Uint8Array(wb*h); bmp.fill(0xFF);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++) if(black[y*w+x]) bmp[y*wb+(x>>3)]&=~(0x80>>(x&7));
+  const payload=concat([ S(tsplHeader()+'BITMAP 0,0,'+wb+','+h+',0,'), bmp, S('\r\nPRINT 1,1\r\n') ]);
+  log('صورة '+w+'×'+h+' = '+payload.length+' بايت', 'info');
+  try{ await sendBytes(payload); log('انتهت بطاقة TSPL.', 'ok'); }
+  catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+
+// ====== ESC/POS احتياطي ======
+async function escText(){
+  log('— ESC/POS نص —', 'info');
+  const ESC='\x1B';
+  const cmd=ESC+'@'+ESC+'a\x01'+ESC+'!\x30'+'SHAWERMAT\n'+ESC+'!\x00'+ESC+'a\x00'+
+    'ESC/POS TEST\nOrder #999\n--------------------------------\n\n\n\n\x0C';
+  try{ await sendBytes(S(cmd)); log('انتهى. طبع؟', 'ok'); }catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+// إرسال صورة ESC/POS على شرائح (الطريقة الموثوقة عبر بلوتوث)
+async function escRaster(wb, h, raster){
+  await sendBytes(new Uint8Array([0x1B,0x40]));   // ESC @ init
+  const BAND = 96;                                 // صفوف لكل شريحة (صغيرة = موثوقة)
+  for (let y0=0; y0<h; y0+=BAND){
+    const rows = Math.min(BAND, h-y0);
+    const header = new Uint8Array([0x1D,0x76,0x30,0x00, wb&0xFF,(wb>>8)&0xFF, rows&0xFF,(rows>>8)&0xFF]);
+    const slice = raster.subarray(y0*wb, (y0+rows)*wb);
+    await sendBytes(concat([header, slice]));
+    log('شريحة '+y0+'→'+(y0+rows));
+    await new Promise(r=>setTimeout(r,40));
+  }
+  await sendBytes(S('\n\n\n\x0C'));               // تغذية + إخراج الملصق
+}
+
+// مربع أسود — اختبار أن مسار الصور يشتغل أصلاً
+async function escBox(){
+  log('— مربع أسود ESC/POS —', 'info');
+  const wb=25, h=200;                              // 200×200 نقطة
+  const raster=new Uint8Array(wb*h); raster.fill(0xFF); // كله أسود
+  try{ await escRaster(wb,h,raster); log('انتهى المربع. طلع أسود؟', 'ok'); }
+  catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+
+async function escTag(){
+  log('— بطاقة ESC/POS (شرائح) —', 'info');
+  const canvas=renderTagCanvas(576);
+  const {w,h,black}=canvasToMono(canvas);
+  const wb=w/8; const raster=new Uint8Array(wb*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++) if(black[y*w+x]) raster[y*wb+(x>>3)]|=(0x80>>(x&7));
+  log('صورة '+w+'×'+h+' = '+(wb*h)+' بايت على شرائح', 'info');
+  try{ await escRaster(wb,h,raster); log('انتهت بطاقة ESC/POS. كيف الجودة؟', 'ok'); }
+  catch(e){ log('خطأ: '+e.message, 'err'); }
+}
+
+document.getElementById('density').addEventListener('input', e=>{ document.getElementById('densVal').textContent=e.target.value; });
+document.getElementById('btnConnect').addEventListener('click', connect);
+document.getElementById('btnCal').addEventListener('click', calibrate);
+document.getElementById('btnTsplText').addEventListener('click', tsplText);
+document.getElementById('btnTsplTag').addEventListener('click', tsplTag);
+document.getElementById('btnEscText').addEventListener('click', escText);
+document.getElementById('btnEscBox').addEventListener('click', escBox);
+document.getElementById('btnEscTag').addEventListener('click', escTag);
+
+log('جاهز. اضغط "اتصال بالطابعة".', 'info');
+log('Web Bluetooth: '+(navigator.bluetooth?'مدعوم ✅':'غير مدعوم ❌'), navigator.bluetooth?'ok':'err');
+</script>
+</body>
+</html>
