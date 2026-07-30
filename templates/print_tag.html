@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بطاقة الطلب #{{ order.id }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* 4x6 inch thermal label — black & white only */
+    @page { size: 4in 6in; margin: 0; }
+    * {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    body {
+      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+      background: #e9e9e9; color: #000;
+    }
+    .sheet { display: flex; flex-direction: column; align-items: center; padding: 16px; }
+
+    .no-print { margin-bottom: 14px; text-align: center; }
+
+    .tag {
+      width: 4in; min-height: 6in; background: #fff;
+      padding: 5mm 5mm 4mm;
+      display: flex; flex-direction: column;
+    }
+    .hdr { text-align: center; border-bottom: 2.5px solid #000; padding-bottom: 2mm; }
+    .hdr h1 { font-size: 27pt; font-weight: 900; letter-spacing: 1px; line-height: 1.1; }
+    .hdr p { font-size: 9pt; font-weight: 600; margin-top: 1mm; }
+
+    .onum {
+      text-align: center; border: 3px solid #000; border-radius: 4px;
+      padding: 2mm 1mm; margin: 3mm 0;
+      font-size: 36pt; font-weight: 900; line-height: 1;
+    }
+
+    .rows { font-size: 12pt; }
+    .r {
+      display: flex; justify-content: space-between;
+      padding: 1.3mm 0; border-bottom: 1px dashed #888;
+    }
+    .r:last-child { border-bottom: none; }
+    .r .l { font-weight: 600; white-space: nowrap; }
+    .r .v { font-weight: 800; text-align: left; max-width: 64%; }
+
+    .items {
+      margin-top: 3mm; border: 2.5px solid #000; border-radius: 4px;
+      padding: 2.5mm 3mm; flex: 1;
+    }
+    .items h3 {
+      font-size: 11pt; font-weight: 800;
+      border-bottom: 1.5px solid #000; padding-bottom: 1.3mm; margin-bottom: 1.5mm;
+    }
+    .items ul { list-style: none; }
+    .items li {
+      font-size: 14pt; font-weight: 700;
+      padding: 1.4mm 0; border-bottom: 1px dotted #aaa;
+    }
+    .items li:last-child { border-bottom: none; }
+
+    .note {
+      border: 2.5px solid #000; border-radius: 4px;
+      padding: 2mm 3mm; margin-top: 2.5mm;
+      font-size: 11.5pt; font-weight: 800;
+    }
+
+    .total {
+      display: flex; justify-content: space-between;
+      font-size: 19pt; font-weight: 900;
+      margin-top: 3mm; padding-top: 2mm; border-top: 3px solid #000;
+    }
+    .ftr { text-align: center; margin-top: 2.5mm; font-size: 9pt; font-weight: 600; }
+
+    @media print {
+      body { background: #fff; }
+      .sheet { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <!-- Controls (hidden when printing) -->
+    <div class="no-print">
+      <button onclick="window.print()"
+              style="background:#cc0000;color:#fff;border:none;padding:10px 30px;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;">
+        🖨 اطبع البطاقة
+      </button>
+      &nbsp;
+      <button onclick="window.close()"
+              style="background:#888;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;">
+        إغلاق
+      </button>
+    </div>
+
+    <!-- 4x6 label -->
+    <div class="tag">
+      <div class="hdr">
+        <h1>شاورمات</h1>
+        <p>الدمام — حي الزهور · 📞 0533647130</p>
+      </div>
+
+      <div class="onum">طلب #{{ order.id }}</div>
+
+      <div class="rows">
+        <div class="r"><span class="l">الاسم</span><span class="v">{{ order.name }}</span></div>
+        <div class="r"><span class="l">الجوال</span><span class="v">{{ order.phone }}</span></div>
+        {% if order.neighborhood %}
+        <div class="r"><span class="l">الحي</span><span class="v">{{ order.neighborhood }}</span></div>
+        {% endif %}
+        {% if order.address %}
+        <div class="r"><span class="l">العنوان</span><span class="v">{{ order.address }}</span></div>
+        {% endif %}
+        <div class="r"><span class="l">الوقت</span><span class="v">{{ order.created_at }}</span></div>
+      </div>
+
+      <div class="items">
+        <h3>الطلبات</h3>
+        <ul>
+          {% for item in order['items'] %}
+          <li>{{ item.qty }}× {{ item.name }} — {{ item.price * item.qty }} ريال</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      {% if order.promo_code %}
+      <div class="note">🎁 كود عرض: {{ order.promo_code }}{% if order.promo_grocery %} — {{ order.promo_grocery }}{% endif %} — تأكد من شاورما الهدية</div>
+      {% endif %}
+
+      {% if order.note %}
+      <div class="note">⚠ ملاحظة: {{ order.note }}</div>
+      {% endif %}
+
+      {% if order.neighborhood %}
+      <div class="r" style="border-bottom:none; margin-top:2.5mm; font-size:12pt;">
+        <span class="l">التوصيل</span>
+        <span class="v">{% if order.delivery_fee == 0 %}مجاني — خصم 5 ريال 🎉{% else %}{{ order.delivery_fee }} ريال{% endif %}</span>
+      </div>
+      {% else %}
+      <div class="r" style="border-bottom:none; margin-top:2.5mm; font-size:13pt; font-weight:800;">
+        <span class="l">النوع</span>
+        <span class="v">★ استلام من المحل</span>
+      </div>
+      {% endif %}
+
+      <div class="total">
+        <span>الإجمالي</span>
+        <span>{{ order.total }} ريال</span>
+      </div>
+
+      <div class="ftr">شكراً لطلبكم من شاورمات 🌯</div>
+    </div>
+  </div>
+</body>
+</html>

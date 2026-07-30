@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-712124773"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-712124773');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تتبع الطلب #{{ order.id }} — شاورمات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body class="track-page">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-text">
+          <h1>شاورمات</h1>
+          <span style="font-size:.75rem;opacity:.7">تتبع الطلب</span>
+        </div>
+      </div>
+      <a href="/" class="btn-outline">← الرئيسية</a>
+    </div>
+  </header>
+
+  <div class="track-body">
+
+    <!-- Current status card -->
+    <div class="status-card" id="statusCard">
+      <div class="status-shaifu">
+        <img class="status-shaifu-img" src="{{ url_for('static', filename='images/shaifu.svg') }}" alt="شيفو" />
+        <span class="status-emoji-badge" id="statusEmoji">⏳</span>
+      </div>
+      <div class="status-label" id="statusLabel">جاري التحميل…</div>
+      <div class="status-sub"   id="statusSub"></div>
+    </div>
+
+    <!-- Timeline -->
+    <ul class="track-timeline" id="timeline">
+      <li class="tl-item" id="tl-pending">
+        <div class="tl-dot">📋</div>
+        <div class="tl-text">
+          <strong>استُلم الطلب</strong>
+          <span id="ts-pending"></span>
+        </div>
+      </li>
+      <li class="tl-item" id="tl-confirmed">
+        <div class="tl-dot">✅</div>
+        <div class="tl-text">
+          <strong>تأكيد الطلب</strong>
+          <span id="ts-confirmed"></span>
+        </div>
+      </li>
+      <li class="tl-item" id="tl-preparing">
+        <div class="tl-dot">👨‍🍳</div>
+        <div class="tl-text">
+          <strong>يتم التحضير</strong>
+          <span id="ts-preparing"></span>
+        </div>
+      </li>
+      <li class="tl-item" id="tl-delivering">
+        <div class="tl-dot">🛵</div>
+        <div class="tl-text">
+          <strong>السائق في الطريق</strong>
+          <span id="ts-delivering"></span>
+        </div>
+      </li>
+      <li class="tl-item" id="tl-delivered">
+        <div class="tl-dot">🏠</div>
+        <div class="tl-text">
+          <strong>وصل الطلب</strong>
+          <span id="ts-delivered"></span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Map (shown when delivering) -->
+    <div class="track-map-section" id="mapSection" style="display:none">
+      <h3>📍 موقع التوصيل</h3>
+      <iframe id="mapFrame" class="track-map-frame" allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <!-- Order details -->
+    <div class="track-detail-card">
+      <h3>تفاصيل الطلب</h3>
+      <div class="detail-row"><span>الاسم</span><span>{{ order.name }}</span></div>
+      <div class="detail-row"><span>الجوال</span><span>{{ order.phone }}</span></div>
+      {% if order.neighborhood %}
+      <div class="detail-row"><span>الحي</span><span>{{ order.neighborhood }}</span></div>
+      {% endif %}
+      <div class="detail-row"><span>الإجمالي</span><span>{{ order.total }} ريال</span></div>
+      <ul class="track-items-list">
+        {% for item in order['items'] %}
+        <li>{{ item.qty }}× {{ item.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- WhatsApp contact -->
+    <a href="https://wa.me/966533647130" class="track-wa-btn" target="_blank">
+      💬 تواصل معنا عبر واتساب
+    </a>
+
+    <p class="track-refresh-note" id="refreshNote">يتم التحديث تلقائياً كل 15 ثانية</p>
+
+  </div>
+
+  <script>
+    var ORDER_ID      = {{ order.id }};
+    var TRACK_TOKEN   = {{ (order.track_token or '') | tojson }};
+    var currentStatus = '{{ order.status }}';
+    var lat           = '{{ order.lat or "" }}';
+    var lng           = '{{ order.lng or "" }}';
+
+    var STATUS_META = {
+      'draft':      { emoji: '📝', label: 'بانتظار تأكيدك',     sub: 'أكمل طلبك بإرسال الرسالة عبر واتساب ✅' },
+      'pending':    { emoji: '⏳', label: 'في انتظار التأكيد',  sub: 'سيتم تأكيد طلبك قريباً' },
+      'confirmed':  { emoji: '✅', label: 'تم تأكيد طلبك',      sub: 'طلبك مؤكد وسيبدأ التحضير' },
+      'preparing':  { emoji: '👨‍🍳', label: 'يتم التحضير',         sub: 'الشيف يحضر طلبك الآن' },
+      'delivering': { emoji: '🛵', label: 'السائق في الطريق',    sub: 'طلبك في الطريق إليك' },
+      'delivered':  { emoji: '🏠', label: 'وصل الطلب!',          sub: 'نتمنى لك وجبة شهية 🌯' },
+      'cancelled':  { emoji: '❌', label: 'تم إلغاء الطلب',      sub: 'تواصل معنا لمزيد من المعلومات' },
+    };
+
+    var STATUS_ORDER = ['pending', 'confirmed', 'preparing', 'delivering', 'delivered'];
+
+    // طلب استلام من المحل = بدون حي → لا يوجد سائق، نغيّر الخطوات
+    var IS_PICKUP = {{ 'true' if not order.neighborhood else 'false' }};
+    if (IS_PICKUP) {
+      STATUS_META['delivering'] = { emoji: '🏪', label: 'جاهز للاستلام', sub: 'طلبك جاهز — تفضّل لاستلامه من المحل 🌯' };
+      STATUS_META['delivered']  = { emoji: '✅', label: 'تم الاستلام',   sub: 'شكراً لك، نتمنى لك وجبة شهية 🌯' };
+      var _dStrong = document.querySelector('#tl-delivering strong');
+      if (_dStrong) _dStrong.textContent = 'جاهز للاستلام';
+      var _dDot = document.querySelector('#tl-delivering .tl-dot');
+      if (_dDot) _dDot.textContent = '🏪';
+      var _vStrong = document.querySelector('#tl-delivered strong');
+      if (_vStrong) _vStrong.textContent = 'تم الاستلام';
+    }
+
+    function applyTimeline(history, status) {
+      var tsMap = {};
+      (history || []).forEach(function(h) { tsMap[h.status] = h.timestamp; });
+
+      // draft behaves like the first step (order received, awaiting confirmation)
+      if (status === 'draft') status = 'pending';
+      var currentIdx = STATUS_ORDER.indexOf(status);
+      STATUS_ORDER.forEach(function(s, idx) {
+        var item = document.getElementById('tl-' + s);
+        var tsEl = document.getElementById('ts-' + s);
+        if (!item) return;
+        item.classList.remove('done', 'active', 'pending-step');
+        if (idx < currentIdx)        { item.classList.add('done'); }
+        else if (idx === currentIdx)  { item.classList.add('active'); }
+        else                          { item.classList.add('pending-step'); }
+        if (tsEl && tsMap[s]) {
+          tsEl.textContent = tsMap[s].replace(/^\d{4}-\d{2}-\d{2} /, '');
+        }
+      });
+    }
+
+    function applyStatus(status, history, orderLat, orderLng) {
+      var meta = STATUS_META[status] || { emoji: '❓', label: status, sub: '' };
+      document.getElementById('statusEmoji').textContent = meta.emoji;
+      document.getElementById('statusLabel').textContent = meta.label;
+      document.getElementById('statusSub').textContent   = meta.sub;
+
+      applyTimeline(history, status);
+
+      var mapSec = document.getElementById('mapSection');
+      if (status === 'delivering' && orderLat && orderLng) {
+        mapSec.style.display = 'block';
+        var frame = document.getElementById('mapFrame');
+        var src = 'https://maps.google.com/maps?q=' + orderLat + ',' + orderLng + '&z=16&output=embed';
+        if (frame.src !== src) frame.src = src;
+      } else {
+        mapSec.style.display = 'none';
+      }
+
+      if (status === 'delivered' || status === 'cancelled') {
+        document.getElementById('refreshNote').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA', { timeZone: 'Asia/Riyadh' });
+      }
+    }
+
+    function pollStatus() {
+      fetch('/api/order/' + ORDER_ID + '/status' +
+            (TRACK_TOKEN ? '?t=' + encodeURIComponent(TRACK_TOKEN) : ''))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status) {
+            currentStatus = data.status;
+            lat = data.lat || lat;
+            lng = data.lng || lng;
+            applyStatus(data.status, data.status_history || [], lat, lng);
+          }
+        })
+        .catch(function() {});
+    }
+
+    var initialHistory = {{ order.status_history | tojson if order.status_history else '[]' }};
+    applyStatus(currentStatus, initialHistory, lat, lng);
+
+    if (currentStatus !== 'delivered' && currentStatus !== 'cancelled') {
+      setInterval(function() {
+        if (currentStatus !== 'delivered' && currentStatus !== 'cancelled') {
+          pollStatus();
+        }
+      }, 15000);
+    }
+  </script>
+</body>
+</html>
