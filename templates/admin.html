@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شاورمات — لوحة الإدارة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    .printer-banner { position: sticky; top: 0; z-index: 9999; background:#dc2626; color:#fff; text-align:center; padding:.75rem 1rem; font-weight:800; font-size:1.02rem; }
+    .new-toast { background:#16a34a; color:#fff; text-align:center; padding:.75rem 1rem; font-weight:800; font-size:1.02rem; }
+    tr.order-new { animation: newPulse 1.5s ease-in-out infinite; }
+    @keyframes newPulse { 0%,100%{ background: rgba(22,163,74,.06);} 50%{ background: rgba(22,163,74,.20);} }
+    tr.order-unprinted { background: rgba(220,38,38,.07); }
+    .row-badge { display:none; font-size:.68rem; font-weight:800; padding:.12rem .45rem; border-radius:6px; margin-inline-start:.3rem; white-space:nowrap; }
+    .row-badge.new { background:#16a34a; color:#fff; }
+    .row-badge.unprinted { background:#dc2626; color:#fff; }
+    .accept-btn { display:none; width:100%; background:#16a34a; color:#fff; border:none; border-radius:8px; padding:.5rem .7rem; font-family:inherit; font-weight:800; font-size:.92rem; cursor:pointer; margin-bottom:.35rem; }
+    .accept-btn:active { transform: scale(.98); }
+    /* Drivers manager + picker */
+    .driver-row { display:flex; justify-content:space-between; align-items:center; gap:.5rem; padding:.55rem .25rem; border-bottom:1px solid #eee; }
+    .driver-info { display:flex; flex-direction:column; gap:.15rem; }
+    .driver-info span { opacity:.7; font-size:.85rem; }
+    .driver-info input { display:block; margin:.12rem 0; padding:.4rem; border:1px solid #ccc; border-radius:6px; font-family:inherit; }
+    .driver-acts { display:flex; gap:.35rem; flex-shrink:0; }
+    .mini-btn { background:#f1f1f1; border:none; border-radius:6px; padding:.4rem .6rem; font-family:inherit; font-weight:700; font-size:.8rem; cursor:pointer; }
+    .mini-btn.danger { background:#fee2e2; color:#b91c1c; }
+    .driver-add { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .driver-add input { flex:1; min-width:120px; padding:.55rem; border:1px solid #ccc; border-radius:8px; font-family:inherit; }
+    .driver-picker-list { display:flex; flex-direction:column; gap:.5rem; margin:.75rem 0; }
+    .picker-driver { background:#f8f8f8; border:1px solid #e5e5e5; border-radius:10px; padding:.7rem .9rem; font-family:inherit; font-weight:700; font-size:1rem; cursor:pointer; text-align:right; }
+    .picker-driver:active { transform:scale(.98); }
+    /* Promo code badge + stats */
+    .promo-badge { display:inline-block; font-size:.68rem; font-weight:800; padding:.12rem .45rem; border-radius:6px; margin-inline-start:.3rem; white-space:nowrap; background:#7c3aed; color:#fff; }
+    .promo-stat-row { display:flex; justify-content:space-between; align-items:center; padding:.6rem .25rem; border-bottom:1px solid #eee; }
+    .promo-stat-row b { font-family:monospace, inherit; }
+    .promo-count { background:#faf5ff; color:#6b21a8; font-weight:800; border-radius:8px; padding:.2rem .6rem; }
+  </style>
+</head>
+<body class="admin-page">
+
+  <div id="printerBanner" class="printer-banner" style="display:none"></div>
+  <div id="newToast" class="new-toast" style="display:none"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-text">
+          <h1>شاورمات</h1>
+          {# Each branch's tablet opens /admin?branch=<id> and sees only its own
+             orders. No ?branch= shows every branch (owner overview). #}
+          <p>لوحة الطلبات — {{ branches[active_branch].name if (active_branch and branches) else 'كل الفروع' }}</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button id="soundBtn" onclick="enableSound()" class="btn-outline" style="white-space:nowrap">🔔 فعّل الصوت</button>
+        <button id="btConnect" onclick="btConnect()" class="btn-outline" style="white-space:nowrap">🖨 ربط الطابعة</button>
+        <button onclick="openDriversModal()" class="btn-outline" style="white-space:nowrap">🛵 السواقين</button>
+        <button onclick="openPromoStatsModal()" class="btn-outline" style="white-space:nowrap">🎁 أكواد البقالات</button>
+        <a href="/" class="btn-outline">← القائمة</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h2 class="section-title">الطلبات</h2>
+      <div class="orders-table-wrap">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الوقت</th>
+              <th>العميل</th>
+              <th>الجوال</th>
+              <th>الحي / الموقع</th>
+              <th>الأصناف</th>
+              <th>الإجمالي</th>
+              <th>الحالة</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+      <p class="empty-msg" id="emptyMsg" style="margin-top:2rem;display:none">لا يوجد طلبات بعد.</p>
+    </div>
+  </main>
+
+  <!-- ══ Drivers manager ═══════════════ -->
+  <div class="modal-overlay" id="driversModal">
+    <div class="modal">
+      <button class="modal-x" onclick="closeDriversModal()" aria-label="إغلاق">✕</button>
+      <h2>🛵 السواقين</h2>
+      <div id="driversList" style="margin:.5rem 0 1rem"></div>
+      <div class="driver-add">
+        <input id="newDriverName" placeholder="اسم السواق" />
+        <input id="newDriverPhone" type="tel" dir="ltr" placeholder="05XXXXXXXX" />
+        <button class="btn-primary" onclick="addDriverFromForm()">➕ إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Driver picker (send an order) ══════ -->
+  <div class="modal-overlay" id="driverPickerModal">
+    <div class="modal modal-small">
+      <button class="modal-x" onclick="closeDriverPicker()" aria-label="إغلاق">✕</button>
+      <h2>أرسل الطلب لأي سواق؟</h2>
+      <div id="driverPickerList" class="driver-picker-list"></div>
+      <button class="skip-btn" onclick="closeDriverPicker()">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- ══ Promo code stats (grocery referrals) ══ -->
+  <div class="modal-overlay" id="promoStatsModal">
+    <div class="modal">
+      <button class="modal-x" onclick="closePromoStatsModal()" aria-label="إغلاق">✕</button>
+      <h2>🎁 أكواد البقالات</h2>
+      <p style="color:var(--muted);font-size:.85rem;margin:.25rem 0 1rem">عدد الطلبات لكل كود — أساس مكافأة موظف البقالة (وجبة مجانية كل 10 طلبات)</p>
+      <div id="promoStatsList"></div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════ state ═══════════
+    window.SW_ORDERS = {{ orders | tojson }};   // initial snapshot from the server
+    window.SW_PROMO_STATS = {{ promo_stats | tojson }};   // initial promo counts
+    // Branch context. ACTIVE_BRANCH is '' in the all-branches (owner) view —
+    // that's the case where each row needs to say which branch it belongs to.
+    // Defaults matter: if this template is ever served by an app.py that predates
+    // branches, tojson on an Undefined raises and the whole dashboard 500s. Staff
+    // losing sight of live orders is far worse than showing them unfiltered.
+    var ACTIVE_BRANCH     = {{ active_branch | default('', true) | tojson }};
+    var SW_BRANCHES       = {{ branches | default({}, true) | tojson }};
+    var SW_DEFAULT_BRANCH = {{ default_branch | default('', true) | tojson }};
+    var ordersById = {};        // id(str) -> last-known order
+    var seenIds = {};           // id(str) -> true once rendered (to detect genuine new arrivals)
+    var POLL_MS = 15000;        // background refresh — printer connection is NEVER reset
+
+    // Printed tracking survives a manual reload (per device).
+    function loadPrinted() {
+      try { return new Set(JSON.parse(localStorage.getItem('sw_printed') || '[]')); }
+      catch (e) { return new Set(); }
+    }
+    var printedSet = loadPrinted();
+    function savePrinted() { try { localStorage.setItem('sw_printed', JSON.stringify(Array.from(printedSet))); } catch (e) {} }
+    function markPrinted(id) { printedSet.add(String(id)); savePrinted(); }
+    function isPrinted(id) { return printedSet.has(String(id)); }
+
+    // ═══════════ audio alert ═══════════
+    var audioCtx = null;
+    function unlockAudio() {
+      if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    function beep() {
+      if (!audioCtx) return;
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.3;
+      o.start(); setTimeout(function () { o.stop(); }, 400);
+    }
+    function enableSound() {
+      unlockAudio(); beep();
+      var btn = document.getElementById('soundBtn');
+      if (btn) { btn.textContent = '🔔 الصوت مفعّل ✅'; btn.disabled = true; }
+    }
+
+    // ═══════════ helpers ═══════════
+    var NEW_STATES  = { draft: 1, pending: 1 };
+    var DONE_STATES = { delivered: 1, cancelled: 1 };
+    function isNew(o)  { return !!NEW_STATES[o.status]; }
+    function isDone(o) { return !!DONE_STATES[o.status]; }
+    // Accepted (not new, not done) but not yet printed successfully → must print.
+    function needsPrint(o) { return !isNew(o) && !isDone(o) && !isPrinted(o.id); }
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function statusOptions(o) {
+      var pickup = !o.neighborhood;
+      var opts = [
+        ['draft', '📲 ينتظر واتساب'], ['pending', '⏳ انتظار'], ['confirmed', '✅ مؤكد'],
+        ['preparing', '👨‍🍳 يتم التحضير'],
+        ['delivering', pickup ? '📦 جاهز للاستلام' : '🛵 بالطريق'],
+        ['delivered',  pickup ? '🏪 تم الاستلام'   : '✔ وصل'],
+        ['cancelled', '✕ ملغي']
+      ];
+      return opts.map(function (p) {
+        return '<option value="' + p[0] + '"' + (o.status === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+      }).join('');
+    }
+
+    // ═══════════ row rendering ═══════════
+    function rowInnerHTML(o) {
+      var pickup = !o.neighborhood;
+      var tok = o.track_token ? '?t=' + encodeURIComponent(o.track_token) : '';
+      var hood = pickup
+        ? '<span class="hood-tag" style="background:#fef3c7;color:#92400e">🏪 استلام من المحل</span>'
+        : '<span class="hood-tag">' + esc(o.neighborhood) + '</span>';
+      // In the all-branches view, say which branch owns this order — a pickup
+      // order has no neighborhood at all, so there'd otherwise be no clue.
+      // Orders from before branches existed fall back to the original branch.
+      if (!ACTIVE_BRANCH) {
+        var br = (SW_BRANCHES || {})[o.branch || SW_DEFAULT_BRANCH];
+        if (br) {
+          hood = '<span class="hood-tag" style="background:#e0e7ff;color:#3730a3">🏢 ' +
+                 esc(br.name) + '</span>' + hood;
+        }
+      }
+      if (!pickup && o.lat && o.lng) {
+        hood += '<a href="https://maps.google.com/?q=' + esc(o.lat) + ',' + esc(o.lng) + '" target="_blank" class="map-link">📍 فتح الخريطة</a>';
+      } else if (o.address) {
+        hood += '<div style="font-size:.82rem;margin-top:.25rem">' + esc(o.address) + '</div>';
+      }
+      if (o.out_of_range) {
+        hood += '<div style="font-size:.8rem;font-weight:800;color:#dc2626;margin-top:.3rem">⚠ الموقع خارج نطاق التوصيل — تأكد قبل الإرسال</div>';
+      }
+      if (o.note) hood += '<p class="order-note">' + esc(o.note) + '</p>';
+
+      var items = (o.items || []).map(function (it) {
+        return '<li>' + esc(it.qty) + '× ' + esc(it.name) + '</li>';
+      }).join('');
+
+      return ''
+        + '<td><strong>#' + o.id + '</strong>'
+        +   '<a href="/order/' + o.id + '/track' + tok + '" class="track-link" target="_blank">تتبع</a>'
+        +   (o.promo_code ? '<span class="promo-badge">🎁 ' + esc(o.promo_code) + '</span>' : '')
+        +   '<span class="row-badge new" data-badge="new">🆕 جديد</span>'
+        +   '<span class="row-badge unprinted" data-badge="unprinted">⚠ غير مطبوع</span>'
+        + '</td>'
+        + '<td style="font-size:.78rem;white-space:nowrap;color:var(--muted)">' + esc(o.created_at) + '</td>'
+        + '<td style="font-weight:600">' + esc(o.name) + '</td>'
+        + '<td><a href="tel:' + esc(o.phone) + '" style="color:var(--primary);font-weight:600">' + esc(o.phone) + '</a></td>'
+        + '<td>' + hood + '</td>'
+        + '<td><ul class="item-list">' + items + '</ul></td>'
+        + '<td style="font-weight:700;white-space:nowrap">' + esc(o.total) + ' ريال</td>'
+        + '<td><select class="status-select status-' + o.status + '" onchange="updateStatus(' + o.id + ', this)">' + statusOptions(o) + '</select></td>'
+        + '<td style="white-space:nowrap">'
+        +   '<button class="accept-btn" data-label="✅ قبول وطباعة" onclick="acceptOrder(' + o.id + ', this)">✅ قبول وطباعة</button>'
+        +   '<button class="print-btn" data-label="🖨 إعادة طباعة" title="إعادة طباعة البطاقة" onclick="btPrintOrder(' + o.id + ', this)">🖨 إعادة طباعة</button>'
+        +   '<button class="driver-btn" title="أرسل للسواق عبر واتساب" onclick="openDriverPicker(' + o.id + ')">📲 سواق</button>'
+        +   '<button class="notify-btn" title="أبلغ العميل بالحالة" onclick="notifyCustomer(' + o.id + ')">💬 إبلغ عميل</button>'
+        + '</td>';
+    }
+
+    function applyRowState(tr, o) {
+      var nw = isNew(o), np = needsPrint(o);
+      tr.classList.toggle('order-new', nw);
+      tr.classList.toggle('order-unprinted', np);
+      var nb = tr.querySelector('[data-badge="new"]');
+      var ub = tr.querySelector('[data-badge="unprinted"]');
+      var ab = tr.querySelector('.accept-btn');
+      if (nb) nb.style.display = nw ? 'inline-block' : 'none';
+      if (ub) ub.style.display = np ? 'inline-block' : 'none';
+      if (ab) ab.style.display = nw ? 'block' : 'none';
+    }
+
+    function buildRow(o) {
+      var tr = document.createElement('tr');
+      tr.id = 'row-' + o.id;
+      tr.innerHTML = rowInnerHTML(o);
+      applyRowState(tr, o);
+      return tr;
+    }
+
+    function updateRow(tr, o) {
+      var sel = tr.querySelector('select.status-select');
+      if (sel && document.activeElement !== sel && sel.value !== o.status) {
+        sel.value = o.status;
+        sel.className = 'status-select status-' + o.status;
+      }
+      applyRowState(tr, o);
+    }
+
+    // Keep the tbody sorted by id descending (newest on top).
+    function insertRowSorted(body, tr, o) {
+      var rows = body.children;
+      for (var i = 0; i < rows.length; i++) {
+        var otherId = parseInt(rows[i].id.replace('row-', ''), 10);
+        if (o.id > otherId) { body.insertBefore(tr, rows[i]); return; }
+      }
+      body.appendChild(tr);
+    }
+
+    function syncOrders(orders, isInitial) {
+      orders = orders || [];
+      var body = document.getElementById('ordersBody');
+      var newArrivals = 0;
+      for (var i = 0; i < orders.length; i++) {
+        var o = orders[i], id = String(o.id);
+        ordersById[id] = o;
+        var existing = document.getElementById('row-' + o.id);
+        if (existing) {
+          updateRow(existing, o);
+        } else {
+          insertRowSorted(body, buildRow(o), o);
+          if (!seenIds[id] && !isInitial) newArrivals++;
+        }
+        seenIds[id] = true;
+      }
+      document.getElementById('emptyMsg').style.display = orders.length ? 'none' : 'block';
+      if (newArrivals > 0) onNewOrders(newArrivals);
+      updatePrinterBanner();
+    }
+
+    // ═══════════ new-order alert ═══════════
+    var _toastTimer = null;
+    function onNewOrders(n) {
+      beep(); setTimeout(beep, 400); setTimeout(beep, 800);
+      document.title = '🔔 طلب جديد! — شاورمات';
+      var t = document.getElementById('newToast');
+      t.textContent = '🔔 ' + (n === 1 ? 'طلب جديد وصل!' : n + ' طلبات جديدة وصلت!');
+      t.style.display = 'block';
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(function () {
+        t.style.display = 'none';
+        document.title = 'شاورمات — لوحة الإدارة';
+      }, 6000);
+    }
+
+    // ═══════════ printer status banner ═══════════
+    function unprintedCount() {
+      var n = 0;
+      for (var id in ordersById) { if (needsPrint(ordersById[id])) n++; }
+      return n;
+    }
+    function updatePrinterBanner() {
+      var b = document.getElementById('printerBanner');
+      if (!b) return;
+      var connected = !!SW_PRINT.writeChar;
+      var unprinted = unprintedCount();
+      if (!connected) {
+        b.style.display = 'block';
+        b.innerHTML = '🔴 الطابعة غير متصلة — اضغط "🖨 ربط الطابعة"' + (unprinted ? ' · يوجد ' + unprinted + ' طلب غير مطبوع' : '');
+      } else if (unprinted > 0) {
+        b.style.display = 'block';
+        b.innerHTML = '🔴 يوجد ' + unprinted + ' طلب غير مطبوع — اضغط "🖨 إعادة طباعة"';
+      } else {
+        b.style.display = 'none';
+      }
+    }
+
+    // ═══════════ order actions ═══════════
+    var STATUS_LABELS = {
+      'draft': 'بانتظار تأكيدك عبر واتساب', 'pending': 'في انتظار التأكيد',
+      'confirmed': 'تم تأكيد طلبك', 'preparing': 'يتم التحضير الآن',
+      'delivering': 'السائق في الطريق إليك', 'delivered': 'وصل طلبك', 'cancelled': 'تم إلغاء الطلب'
+    };
+
+    async function setStatus(id, status) {
+      var o = ordersById[String(id)];
+      if (o) o.status = status;
+      var tr = document.getElementById('row-' + id);
+      if (tr) {
+        var sel = tr.querySelector('select.status-select');
+        if (sel) { sel.value = status; sel.className = 'status-select status-' + status; }
+        if (o) applyRowState(tr, o);
+      }
+      updatePrinterBanner();
+      try {
+        await fetch('/api/order/' + id + '/status', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: status })
+        });
+      } catch (e) {}
+    }
+
+    function updateStatus(id, select) { setStatus(id, select.value); }
+
+    // ACCEPT = print the sticker AND move the order into preparation, one click.
+    async function acceptOrder(id, btn) {
+      await btPrintOrder(id, btn);        // print while the button is still visible
+      await setStatus(id, 'preparing');   // accept regardless; stays flagged غير مطبوع if print failed
+    }
+
+    // ═══════════ Drivers (name + phone), stored on this tablet ═══════════
+    function loadDrivers() {
+      try {
+        var arr = JSON.parse(localStorage.getItem('sw_drivers') || 'null');
+        if (Array.isArray(arr)) return arr;
+      } catch (e) {}
+      // One-time migration from the old single-driver field.
+      var old = localStorage.getItem('sw_driver');
+      if (old) {
+        var norm = normDriverPhone(old);
+        if (norm) { var seed = [{ id: Date.now(), name: 'سواق', phone: norm }]; saveDrivers(seed); return seed; }
+      }
+      return [];
+    }
+    function saveDrivers(arr) { localStorage.setItem('sw_drivers', JSON.stringify(arr)); }
+
+    function normDriverPhone(raw) {
+      var d = (raw || '').replace(/\D/g, '');
+      if (/^9665\d{8}$/.test(d)) return '0' + d.slice(3);
+      if (/^05\d{8}$/.test(d))   return d;
+      if (/^5\d{8}$/.test(d))    return '0' + d;
+      return null;
+    }
+
+    function openDriversModal()  { renderDriversManager(); document.getElementById('driversModal').classList.add('open'); }
+    function closeDriversModal() { document.getElementById('driversModal').classList.remove('open'); }
+
+    function renderDriversManager() {
+      var drivers = loadDrivers();
+      var list = document.getElementById('driversList');
+      if (!drivers.length) {
+        list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:1rem">ما فيه سواقين — أضف سواق بالأسفل.</p>';
+        return;
+      }
+      list.innerHTML = drivers.map(function (d) {
+        return '<div class="driver-row" data-id="' + d.id + '">' +
+          '<div class="driver-info"><b>' + esc(d.name) + '</b><span dir="ltr">' + esc(d.phone) + '</span></div>' +
+          '<div class="driver-acts">' +
+            '<button class="mini-btn" onclick="startEditDriver(' + d.id + ')">✎ تعديل</button>' +
+            '<button class="mini-btn danger" onclick="deleteDriver(' + d.id + ')">🗑 حذف</button>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    function addDriverFromForm() {
+      var nameEl = document.getElementById('newDriverName');
+      var phoneEl = document.getElementById('newDriverPhone');
+      var name = nameEl.value.trim();
+      var phone = normDriverPhone(phoneEl.value);
+      if (!name)  { alert('اكتب اسم السواق'); return; }
+      if (!phone) { alert('رقم جوال غير صحيح — اكتب رقم سعودي 05XXXXXXXX'); return; }
+      var drivers = loadDrivers();
+      drivers.push({ id: Date.now(), name: name, phone: phone });
+      saveDrivers(drivers);
+      nameEl.value = ''; phoneEl.value = '';
+      renderDriversManager();
+    }
+
+    function deleteDriver(id) {
+      if (!confirm('حذف هذا السواق؟')) return;
+      saveDrivers(loadDrivers().filter(function (d) { return d.id !== id; }));
+      renderDriversManager();
+    }
+
+    function startEditDriver(id) {
+      var d = loadDrivers().filter(function (x) { return x.id === id; })[0];
+      if (!d) return;
+      var row = document.querySelector('.driver-row[data-id="' + id + '"]');
+      row.innerHTML =
+        '<div class="driver-info">' +
+          '<input class="driver-edit-name" value="' + esc(d.name) + '" />' +
+          '<input class="driver-edit-phone" type="tel" dir="ltr" value="' + esc(d.phone) + '" />' +
+        '</div>' +
+        '<div class="driver-acts">' +
+          '<button class="mini-btn" onclick="saveEditDriver(' + id + ', this)">💾 حفظ</button>' +
+          '<button class="mini-btn" onclick="renderDriversManager()">إلغاء</button>' +
+        '</div>';
+    }
+
+    function saveEditDriver(id, btn) {
+      var row = btn.closest('.driver-row');
+      var name = row.querySelector('.driver-edit-name').value.trim();
+      var phone = normDriverPhone(row.querySelector('.driver-edit-phone').value);
+      if (!name)  { alert('اكتب اسم السواق'); return; }
+      if (!phone) { alert('رقم جوال غير صحيح'); return; }
+      saveDrivers(loadDrivers().map(function (d) { return d.id === id ? { id: id, name: name, phone: phone } : d; }));
+      renderDriversManager();
+    }
+
+    // Pick which driver to send this order to.
+    function openDriverPicker(orderId) {
+      var drivers = loadDrivers();
+      if (!drivers.length) {
+        if (confirm('ما فيه سواقين محفوظين. تبي تضيف سواق الآن؟')) openDriversModal();
+        return;
+      }
+      var box = document.getElementById('driverPickerList');
+      box.innerHTML = drivers.map(function (d) {
+        return '<button class="picker-driver" onclick="sendToDriver(' + orderId + ', \'' + d.phone + '\')">' +
+          '🛵 ' + esc(d.name) + ' <span dir="ltr" style="opacity:.6">' + esc(d.phone) + '</span></button>';
+      }).join('');
+      document.getElementById('driverPickerModal').classList.add('open');
+    }
+    function closeDriverPicker() { document.getElementById('driverPickerModal').classList.remove('open'); }
+
+    function sendToDriver(id, phone) {
+      var o = ordersById[String(id)]; if (!o) return;
+      var driver = (phone || '').replace(/\D/g, '');
+      if (!driver) { openDriverPicker(id); return; }
+      if (driver.startsWith('0')) driver = '966' + driver.slice(1);
+      var loc = '';
+      if (o.lat && o.lng) loc = '\n📍 الموقع: https://maps.google.com/?q=' + o.lat + ',' + o.lng;
+      else if (o.address) loc = '\nالعنوان: ' + o.address;
+      var msg = '🛵 *طلب رقم #' + o.id + '*\n' +
+                'العميل: ' + o.name + ' — ' + o.phone + '\n' +
+                (o.neighborhood ? 'الحي: ' + o.neighborhood : '') + loc + '\n' +
+                'الإجمالي: ' + o.total + ' ريال';
+      window.open('https://wa.me/' + driver + '?text=' + encodeURIComponent(msg), '_blank');
+      closeDriverPicker();
+    }
+
+    function notifyCustomer(id) {
+      var o = ordersById[String(id)]; if (!o) return;
+      var custPhone = String(o.phone || '').replace(/\D/g, '');
+      if (!custPhone) { alert('رقم جوال العميل غير متوفر'); return; }
+      if (custPhone.startsWith('0')) custPhone = '966' + custPhone.slice(1);
+      var tok = o.track_token ? '?t=' + encodeURIComponent(o.track_token) : '';
+      var trackUrl = window.location.origin + '/order/' + o.id + '/track' + tok;
+      var msg;
+      if (o.status === 'draft') {
+        var totalTxt = o.total ? ' بقيمة ' + o.total + ' ريال' : '';
+        msg = 'مرحباً ' + o.name + ' 👋\n' +
+              'وصلنا طلبك رقم #' + o.id + totalTxt + ' من موقع شاورمات 🌯\n' +
+              'بس ما وصلتنا رسالة التأكيد، وما نقدر نبدأ التحضير قبلها.\n' +
+              'للتأكيد: رد على هذي الرسالة بكلمة "تأكيد" ✅\n\n' +
+              '🔗 حالة طلبك: ' + trackUrl;
+      } else {
+        msg = 'مرحباً ' + o.name + ' 👋\n' +
+              'طلبك رقم #' + o.id + ' — ' + (STATUS_LABELS[o.status] || o.status) + '\n\n' +
+              '🔗 تتبع طلبك: ' + trackUrl;
+      }
+      window.open('https://wa.me/' + custPhone + '?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    // ══════════════════ طباعة البلوتوث (TSPL) ══════════════════
+    var SW_PRINT = {
+      device: null,
+      writeChar: null,
+      SERVICES: [
+        '000018f0-0000-1000-8000-00805f9b34fb','0000ff00-0000-1000-8000-00805f9b34fb',
+        '0000ffe0-0000-1000-8000-00805f9b34fb','0000ffe5-0000-1000-8000-00805f9b34fb',
+        '0000fff0-0000-1000-8000-00805f9b34fb','0000ff80-0000-1000-8000-00805f9b34fb',
+        '0000fee7-0000-1000-8000-00805f9b34fb','0000fd00-0000-1000-8000-00805f9b34fb',
+        '49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+      ]
+    };
+
+    function btStatus(text, ok) {
+      var b = document.getElementById('btConnect');
+      if (!b) return;
+      b.textContent = text;
+      b.style.background = ok ? '#16a34a' : '';
+      b.style.color = ok ? '#fff' : '';
+      b.style.borderColor = ok ? '#16a34a' : '';
+    }
+
+    async function btPickWritable(server) {
+      var services = await server.getPrimaryServices();
+      // نفضّل fff2 (المؤكدة لطابعتك)
+      for (var s = 0; s < services.length; s++) {
+        var chars = [];
+        try { chars = await services[s].getCharacteristics(); } catch (e) { continue; }
+        for (var c = 0; c < chars.length; c++) {
+          var p = chars[c].properties;
+          if (/fff2/.test(chars[c].uuid) && (p.write || p.writeWithoutResponse)) return chars[c];
+        }
+      }
+      // أي قناة كتابة
+      for (var s2 = 0; s2 < services.length; s2++) {
+        var ch2 = [];
+        try { ch2 = await services[s2].getCharacteristics(); } catch (e) { continue; }
+        for (var k = 0; k < ch2.length; k++) {
+          var pp = ch2[k].properties;
+          if (pp.write || pp.writeWithoutResponse) return ch2[k];
+        }
+      }
+      return null;
+    }
+
+    async function btConnectDevice(device) {
+      SW_PRINT.device = device;
+      device.addEventListener('gattserverdisconnected', function () {
+        SW_PRINT.writeChar = null; btStatus('🖨 ربط الطابعة', false); updatePrinterBanner();
+      });
+      var server = await device.gatt.connect();
+      var ch = await btPickWritable(server);
+      if (!ch) { btStatus('⚠ بدون قناة كتابة', false); return false; }
+      SW_PRINT.writeChar = ch;
+      localStorage.setItem('sw_printer_id', device.id);
+      btStatus('🖨 الطابعة متصلة ✅', true);
+      updatePrinterBanner();
+      return true;
+    }
+
+    async function btConnect() {
+      if (!navigator.bluetooth) { alert('المتصفح لا يدعم بلوتوث الويب. استخدم Chrome.'); return; }
+      try {
+        var device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true, optionalServices: SW_PRINT.SERVICES
+        });
+        await btConnectDevice(device);
+      } catch (e) {
+        if (e.name !== 'NotFoundError') alert('فشل الاتصال: ' + e.message);
+      }
+    }
+
+    // إعادة ربط صامتة بعد تحديث الصفحة (بدون اختيار من جديد)
+    async function btTryReconnect() {
+      try {
+        if (!navigator.bluetooth || !navigator.bluetooth.getDevices) return;
+        var id = localStorage.getItem('sw_printer_id');
+        if (!id) return;
+        var devices = await navigator.bluetooth.getDevices();
+        for (var i = 0; i < devices.length; i++) {
+          if (devices[i].id === id) {
+            btStatus('🖨 جاري إعادة الربط…', false);
+            await btConnectDevice(devices[i]);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function btSend(bytes) {
+      var ch = SW_PRINT.writeChar;
+      var useNR = ch.properties.writeWithoutResponse;
+      var CHUNK = 180;
+      for (var i = 0; i < bytes.length; i += CHUNK) {
+        var chunk = bytes.slice(i, i + CHUNK);
+        if (useNR) await ch.writeValueWithoutResponse(chunk);
+        else       await ch.writeValue(chunk);
+        if (useNR) await new Promise(function (r) { setTimeout(r, 6); });
+      }
+    }
+
+    var _enc = new TextEncoder();
+    function _S(s) { return _enc.encode(s); }
+    function _concat(arr) {
+      var n = 0, i; for (i = 0; i < arr.length; i++) n += arr[i].length;
+      var o = new Uint8Array(n), off = 0;
+      for (i = 0; i < arr.length; i++) { o.set(arr[i], off); off += arr[i].length; }
+      return o;
+    }
+
+    // رسم بطاقة الطلب الحقيقية على canvas
+    function renderOrderCanvas(order) {
+      var W = 800;                          // 4 إنش @203dpi (مضاعف 8)
+      var cv = document.createElement('canvas');
+      cv.width = W; cv.height = 2400;
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, 2400);
+      ctx.fillStyle = '#000'; ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      var R = W - 24, y = 20;
+      function f(px, wt) { return (wt || 700) + ' ' + px + 'px Cairo, Tahoma, sans-serif'; }
+      function line(t, px, wt) { ctx.font = f(px, wt); ctx.fillText(t, R, y); y += px + 12; }
+      function rule() { ctx.fillRect(16, y, W - 32, 3); y += 14; }
+
+      ctx.textAlign = 'center';
+      ctx.font = f(80, 900); ctx.fillText('شاورمات', W / 2, y); y += 96;
+      ctx.font = f(26, 600); ctx.fillText('الدمام — حي الزهور · 0533647130', W / 2, y); y += 46;
+      ctx.textAlign = 'right'; rule();
+
+      ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeRect(30, y, W - 60, 100);
+      ctx.font = f(64, 900); ctx.fillText('طلب #' + order.id, W / 2, y + 14); y += 124;
+      ctx.textAlign = 'right';
+
+      line('الاسم: ' + (order.name || ''), 36, 700);
+      line('الجوال: ' + (order.phone || ''), 36, 700);
+      if (order.neighborhood) line('الحي: ' + order.neighborhood, 36, 700);
+      if (order.address) line('العنوان: ' + order.address, 30, 600);
+      if (order.created_at) line('الوقت: ' + order.created_at, 28, 600);
+      rule();
+
+      line('الطلبات:', 40, 800);
+      var items = order.items || [];
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var lt = (parseInt(it.price, 10) || 0) * (parseInt(it.qty, 10) || 0);
+        line((it.qty || 0) + '× ' + (it.name || '') + ' — ' + lt + ' ريال', 34, 600);
+      }
+      rule();
+
+      if (order.promo_code) {
+        line('🎁 كود عرض: ' + order.promo_code + (order.promo_grocery ? ' — ' + order.promo_grocery : ''), 32, 800);
+        rule();
+      }
+      if (order.note) { line('ملاحظة: ' + order.note, 32, 800); rule(); }
+
+      if (order.neighborhood) {
+        var df = (order.delivery_fee === 0) ? 'مجاني' : ((order.delivery_fee || 0) + ' ريال');
+        line('التوصيل: ' + df, 34, 700);
+      } else {
+        line('★ استلام من المحل', 36, 800);
+      }
+      ctx.font = f(52, 900); ctx.fillText('الإجمالي: ' + order.total + ' ريال', R, y); y += 72; rule();
+      ctx.textAlign = 'center'; ctx.font = f(26, 600); ctx.fillText('شكراً لطلبكم', W / 2, y); y += 46;
+
+      var H = Math.ceil((y + 16) / 8) * 8;
+      var out = document.createElement('canvas'); out.width = W; out.height = H;
+      var o = out.getContext('2d'); o.fillStyle = '#fff'; o.fillRect(0, 0, W, H); o.drawImage(cv, 0, 0);
+      return out;
+    }
+
+    // canvas → أمر TSPL BITMAP (bit 0 = أسود)
+    function canvasToTSPL(canvas) {
+      var w = canvas.width, h = canvas.height;
+      var d = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+      var wb = w / 8;
+      var bmp = new Uint8Array(wb * h); bmp.fill(0xFF);
+      for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
+          var i = (y * w + x) * 4;
+          var lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          if (lum < 128) bmp[y * wb + (x >> 3)] &= ~(0x80 >> (x & 7));
+        }
+      }
+      var header = _S('SIZE 4,6\r\nGAP 3 mm,0 mm\r\nDENSITY 15\r\nSPEED 4\r\nDIRECTION 1\r\nREFERENCE 0,0\r\nCLS\r\nBITMAP 0,0,' + wb + ',' + h + ',0,');
+      var footer = _S('\r\nPRINT 1,1\r\n');
+      return _concat([header, bmp, footer]);
+    }
+
+    // Print one order's sticker. Returns true on success. Never fails silently:
+    // failure keeps the order flagged غير مطبوع and raises the red banner.
+    async function btPrintOrder(id, btn) {
+      var order = ordersById[String(id)] || (window.SW_ORDERS || []).filter(function (o) { return String(o.id) === String(id); })[0];
+      if (!order) return false;
+      var label = btn ? (btn.getAttribute('data-label') || btn.textContent) : '';
+      function done(txt, err) {
+        if (!btn) return;
+        btn.disabled = false; btn.textContent = txt || label;
+        btn.style.background = err ? '#dc2626' : ''; btn.style.color = err ? '#fff' : '';
+        if (txt) setTimeout(function () { btn.textContent = label; btn.style.background = ''; btn.style.color = ''; }, 2200);
+      }
+      if (!SW_PRINT.writeChar) {
+        await btConnect();
+        if (!SW_PRINT.writeChar) { updatePrinterBanner(); done('⚠ غير متصلة', true); return false; }
+      }
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الطباعة…'; }
+      try {
+        await document.fonts.ready;
+        var payload = canvasToTSPL(renderOrderCanvas(order));
+        await btSend(payload);
+        markPrinted(id);
+        var tr = document.getElementById('row-' + id); if (tr) applyRowState(tr, order);
+        updatePrinterBanner();
+        done('✅ طُبع', false);
+        return true;
+      } catch (e) {
+        SW_PRINT.writeChar = null; btStatus('🖨 ربط الطابعة', false);
+        var tr2 = document.getElementById('row-' + id); if (tr2) applyRowState(tr2, order);
+        updatePrinterBanner();
+        done('⚠ فشلت', true);
+        return false;
+      }
+    }
+
+    // ═══════════ promo code stats (grocery referrals) ═══════════
+    var promoStats = window.SW_PROMO_STATS || [];
+
+    function renderPromoStats() {
+      var list = document.getElementById('promoStatsList');
+      if (!promoStats.length) {
+        list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:1rem">ما فيه أكواد مسجّلة.</p>';
+        return;
+      }
+      list.innerHTML = promoStats.map(function (s) {
+        return '<div class="promo-stat-row">' +
+          '<div><b>' + esc(s.code) + '</b> — ' + esc(s.grocery) + '</div>' +
+          '<span class="promo-count">' + s.count + ' طلب</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    function openPromoStatsModal()  { renderPromoStats(); document.getElementById('promoStatsModal').classList.add('open'); }
+    function closePromoStatsModal() { document.getElementById('promoStatsModal').classList.remove('open'); }
+
+    // ═══════════ init + polling ═══════════
+    // Must carry the same branch filter as the server-rendered page, or the
+    // first background refresh would replace this branch's list with every
+    // branch's orders.
+    function pollOrders() {
+      fetch('/api/admin/orders' + (ACTIVE_BRANCH ? '?branch=' + encodeURIComponent(ACTIVE_BRANCH) : ''))
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          syncOrders(d.orders || [], false);
+          if (d.promo_stats) {
+            promoStats = d.promo_stats;
+            if (document.getElementById('promoStatsModal').classList.contains('open')) renderPromoStats();
+          }
+        })
+        .catch(function () {});
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      loadDrivers();                                  // migrate old single-driver field if present
+      syncOrders(window.SW_ORDERS || [], true);      // initial paint, no sound
+      btTryReconnect().then(updatePrinterBanner);     // reconnect printer once at shift start
+      updatePrinterBanner();
+      setInterval(pollOrders, POLL_MS);               // background refresh — no page reload
+    });
+  </script>
+</body>
+</html>
