@@ -217,18 +217,76 @@ function captureDeliveryLocation(done) {
   if (coBtn) { coBtn.disabled = true; coBtn.textContent = '📍 جاري تحديد موقعك…'; }
   function restore() { if (coBtn) { coBtn.disabled = false; coBtn.textContent = origText; } }
 
+  // Checkout MUST continue exactly once, whichever path gets here first.
+  var settled = false;
+  function proceed() {
+    if (settled) return;
+    settled = true;
+    clearTimeout(watchdog);
+    restore();
+    done();
+  }
+
+  // In-app browsers (Snapchat, Instagram) can swallow the permission prompt and
+  // then never invoke either callback — the `timeout` option below is not
+  // honoured in that case, so the button would stay disabled forever and the
+  // customer is stranded on the cart. This watchdog is the real guarantee.
+  var watchdog = setTimeout(proceed, 3500);
+
   navigator.geolocation.getCurrentPosition(
     function(pos) {
-      restore();
+      if (settled) return;
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
       var br = branchInfo(_activeBranch);
       var dist = haversineKm(lat, lng, br.lat, br.lng);
       _deliveryCoords = { lat: lat, lng: lng, outOfRange: dist > (br.radius_km || 2.2) };
-      done();
+      proceed();
     },
-    function() { restore(); done(); },   // denied / failed → proceed anyway (soft)
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    proceed,   // denied / failed → carry on without coords (soft geofence)
+    // The fix is only compared against a 2.2 km radius, so network-level accuracy
+    // is plenty, and a short timeout keeps the button responsive.
+    { enableHighAccuracy: false, timeout: 3000, maximumAge: 0 }
   );
+}
+
+// ── Snap Pixel identity ──────────────────────
+
+var SNAP_PIXEL_ID = '1a588a86-d4d4-4844-b6d5-d9a9456d3cf4';
+
+// Snap can only attribute a conversion to a Snapchatter if we hand it a hashed
+// identifier — without one, Events Manager rates event quality "Poor" and
+// conversion-optimised delivery has nothing to learn from. We have the phone at
+// checkout, so hash it into the E.164 digits Snap expects (9665XXXXXXXX).
+async function snapHashedPhone(localPhone) {
+  var norm = normalizeSaudiPhone(localPhone);
+  if (!norm || !window.crypto || !crypto.subtle) return null;
+  try {
+    var digits = '966' + norm.slice(1);
+    var buf    = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(digits));
+    return Array.prototype.map.call(new Uint8Array(buf), function(b) {
+      return ('0' + b.toString(16)).slice(-2);
+    }).join('');
+  } catch (e) { return null; }
+}
+
+// scevent.min.js drops a first-party `_scid` cookie; Snap asks for its value
+// back as uuid_c1 to raise the match rate. It is set once the SDK has loaded,
+// so callers late in the funnel will find it even if page load did not.
+function snapScid() {
+  var m = document.cookie.match(/(?:^|;\s*)_scid=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+// Re-init the pixel with whatever identifiers we have. Snap treats a repeat
+// init as an identity update, so events tracked afterwards carry them.
+async function snapIdentify(localPhone) {
+  if (typeof snaptr !== 'function') return;
+  var ids    = {};
+  var hashed = await snapHashedPhone(localPhone);
+  var scid   = snapScid();
+  if (hashed) ids.user_hashed_phone_number = hashed;
+  if (scid)   ids.uuid_c1 = scid;
+  if (Object.keys(ids).length) snaptr('init', SNAP_PIXEL_ID, ids);
 }
 
 // ── Cart core ────────────────────────────────
@@ -933,7 +991,19 @@ function openOrderForm() {
   });
 
   if (typeof snaptr === 'function') {
-    snaptr('track', 'START_CHECKOUT', { price: getSubtotal(), currency: 'SAR' });
+    // `_scid` is reliably present by now even if it was not at page load.
+    // snapIdentify hashes asynchronously, so track from the promise — otherwise
+    // the identity init lands after the event it was meant to identify.
+    var savedAtCheckout = getSavedCustomer();
+    var checkoutPayload = {
+      price:        getSubtotal(),
+      currency:     'SAR',
+      item_ids:     Object.keys(cart),
+      number_items: Object.keys(cart).reduce(function(n, k) { return n + cart[k].qty; }, 0),
+    };
+    snapIdentify(savedAtCheckout && savedAtCheckout.phone).then(function() {
+      snaptr('track', 'START_CHECKOUT', checkoutPayload);
+    });
   }
 
   // Adjust modal for pickup vs delivery
@@ -1184,7 +1254,14 @@ async function submitOrder(e) {
       });
 
       if (typeof snaptr === 'function') {
-        snaptr('track', 'PURCHASE', { price: grandTotal, currency: 'SAR', transaction_id: String(data.order_id || '') });
+        await snapIdentify(phone);
+        snaptr('track', 'PURCHASE', {
+          price:          grandTotal,
+          currency:       'SAR',
+          transaction_id: String(data.order_id || ''),
+          item_ids:       Object.keys(cart),
+          number_items:   items.reduce(function(n, it) { return n + it.qty; }, 0),
+        });
       }
 
       // Save order ID + time so the track button shows for ~3 hours then auto-hides
@@ -1297,6 +1374,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (saved && saved.phone) {
     fetchLoyalty(saved.phone);
   }
+  // Attach whatever identity we have before the funnel starts, so ADD_CART and
+  // START_CHECKOUT are matchable too and not just PURCHASE. Deferred a moment
+  // because scevent.min.js loads async and has to set `_scid` first.
+  setTimeout(function() { snapIdentify(saved && saved.phone); }, 1500);
 
   // Chip groups that update a price display element
   [
