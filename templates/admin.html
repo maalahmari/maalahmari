@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ static_v('css/style.css') }}" />
   <style>
     .printer-banner { position: sticky; top: 0; z-index: 9999; background:#dc2626; color:#fff; text-align:center; padding:.75rem 1rem; font-weight:800; font-size:1.02rem; }
     .new-toast { background:#16a34a; color:#fff; text-align:center; padding:.75rem 1rem; font-weight:800; font-size:1.02rem; }

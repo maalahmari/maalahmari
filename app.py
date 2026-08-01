@@ -34,6 +34,18 @@ except ImportError:
 
 app = Flask(__name__)
 
+
+# Static assets are cached hard by browsers, so a deploy would otherwise leave
+# returning customers running the previous build indefinitely. Stamping the
+# file's mtime into the URL busts that cache on change, and only on change.
+@app.template_global()
+def static_v(filename):
+    try:
+        return int(os.path.getmtime(os.path.join(app.static_folder, filename)))
+    except OSError:
+        return 0
+
+
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 
 # Admin dashboard password — set ADMIN_PASSWORD in .env (local) or the WSGI file
