@@ -783,7 +783,12 @@ function addExtraSimple(name, price, cardId) {
 
 // Soft drink: flat price, flavor choice only
 var DRINK_PRICE = 4;
-var MIN_ORDER   = 25;
+// 25 blocked almost the whole menu: every single-serving item (شاورما 7, صاروخ/جامبو 13,
+// صحن صغير 18) and even the full meals (19) sat under it, so a customer ordering for
+// themselves could never check out. The Aug 2-3 campaign showed 30 add-to-carts → 3
+// checkouts because of this. 15 clears every meal while still keeping the 7/13 single
+// sandwich out, where the 5 ريال delivery would eat the margin.
+var MIN_ORDER   = 15;
 
 function addDrinkConf() {
   var chip = document.querySelector('#drink-flavor .chip.active');
