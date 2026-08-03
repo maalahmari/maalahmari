@@ -277,6 +277,55 @@ function snapScid() {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
+// ── Attribution ──────────────────────────────
+// Without this the order row records no source, so an ad-driven order is
+// indistinguishable from a walk-in regular — which makes cost-per-order, and
+// therefore any bid decision, unmeasurable.
+//
+// Snapchat appends ?ScCid=<click id> to the landing URL. We store first-touch
+// so a visitor who lands from the ad and orders on a later visit (or after a
+// reload, which drops the query string) still carries the original source.
+var SOURCE_TTL = 7 * 24 * 60 * 60 * 1000;   // 7 days — Snap's click-attribution window
+
+// The stored ad click, or '' when there is none / it has expired. Kept separate
+// from getSource() because that one never returns '' — it falls back to
+// 'direct', which would make the first-touch guard below always fail.
+function storedSource() {
+  try {
+    var raw = localStorage.getItem('sw_source');
+    if (!raw) return '';
+    var o = JSON.parse(raw);
+    if (Date.now() - (o.at || 0) > SOURCE_TTL) return '';
+    return o.s || '';
+  } catch (e) { return ''; }
+}
+
+function captureSource() {
+  try {
+    var p   = new URLSearchParams(location.search);
+    var src = '';
+    if (p.get('ScCid'))           src = 'snap:' + p.get('ScCid');
+    else if (p.get('utm_source')) src = 'utm:'  + p.get('utm_source');
+    // First touch wins — we want the source that *acquired* the customer, so a
+    // regular who clicks a later ad isn't re-credited to it as a new one.
+    if (src && !storedSource()) {
+      localStorage.setItem('sw_source', JSON.stringify({ s: src, at: Date.now() }));
+    }
+  } catch (e) {}
+}
+
+function getSource() {
+  var s = storedSource();
+  if (s) return s;
+  // No stored ad click — fall back to whoever linked here this visit.
+  try {
+    if (document.referrer) return 'ref:' + new URL(document.referrer).hostname;
+  } catch (e) {}
+  return 'direct';
+}
+
+captureSource();
+
 // Re-init the pixel with whatever identifiers we have. Snap treats a repeat
 // init as an identity update, so events tracked afterwards carry them.
 async function snapIdentify(localPhone) {
@@ -1225,6 +1274,8 @@ async function submitOrder(e) {
     branch:       _activeBranch,
     items:        items,
     total:        grandTotal,
+    // Where this visitor came from — separates ad-driven orders from organic.
+    source:       getSource(),
   };
   // Captured delivery location → store it (admin/track map) + flag if out of zone.
   if (_deliveryCoords) {

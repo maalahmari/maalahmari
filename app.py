@@ -575,6 +575,10 @@ def place_order():
             "lat": data.get("lat", ""),
             "lng": data.get("lng", ""),
             "out_of_range": bool(data.get("out_of_range", False)),
+            # How the customer reached the site: "snap:<ScCid>" for a Snapchat ad
+            # click, "utm:<source>", "ref:<host>", or "direct". Empty for orders
+            # placed by clients running JS from before this field existed.
+            "source": str(data.get("source", ""))[:120],
             "status": "draft",
             "created_at": now,
             "status_history": [{"status": "draft", "timestamp": now}],

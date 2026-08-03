@@ -16,7 +16,13 @@ ENV/
 !.env.example
 
 # ── Customer data — must NEVER leave the server ──
+# These hold names, phones, addresses and GPS coords. This repo is PUBLIC
+# (it is the GitHub profile repo), so a stray `git add -A` run on the server
+# would expose them. The server working tree carries all three directories.
 data/orders.json
+data/backups/
+data/data/
+data/archive/
 *.db
 *.sqlite
 *.sqlite3
