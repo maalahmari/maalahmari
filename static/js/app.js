@@ -47,7 +47,9 @@ var MIXED_SURCHARGE = 1;
 
 // Free-delivery promo: subtotal >= FREE_DELIVERY_MIN → free delivery.
 // Between NUDGE and MIN → nudge the customer to top up to unlock it.
-var FREE_DELIVERY_MIN   = 50;
+// PROMO 2026-08-04 → 2026-08-18: 0 means every order gets free delivery.
+// To end it, restore 50 here AND in app.py (FREE_DELIVERY_MIN) — keep in sync.
+var FREE_DELIVERY_MIN   = 0;
 var FREE_DELIVERY_NUDGE = 36;   // don't nudge about free delivery until the cart reaches this
 
 // Delivery geofence (SOFT): we capture the customer's GPS at checkout to attach

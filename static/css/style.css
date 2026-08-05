@@ -71,6 +71,18 @@ a    { color: inherit; text-decoration: none; }
   line-height: 1.4; margin: 0 0 1.1rem;
 }
 
+/* ── PROMO 2026-08-04 → 2026-08-18: free-delivery banner ───────────────────
+   Green, not var(--primary): the order CTA below is orange, and two orange
+   blocks would read as one and blunt both. Delete this rule (and its two
+   media-query entries further down) when the promo ends. */
+.promo-banner {
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  color: #fff; font-weight: 900; font-size: 1.15rem; line-height: 1.35;
+  border: 1px solid rgba(255,255,255,.22); border-radius: 14px;
+  padding: .75rem 1rem; margin: 0 0 .8rem;
+  box-shadow: 0 6px 20px rgba(34,197,94,.32);
+}
+
 /* Hero meal-card row — quick add-to-cart shortcuts, replaces the old
    rotating background photos. Grid only: a horizontal flex here previously
    mis-laid-out under dir="rtl" (see .screen-full comment above it). */
@@ -138,6 +150,7 @@ a    { color: inherit; text-decoration: none; }
   .landing-brand p        { font-size: .86rem; margin-bottom: .4rem; }
   .landing-brand .status-badge { margin-bottom: .45rem; }
   .landing-note           { font-size: .92rem; margin-bottom: .45rem; }
+  .promo-banner           { font-size: 1rem; padding: .55rem .8rem; margin-bottom: .5rem; }
   .hero-solo              { margin-bottom: .5rem; }
   .hero-solo-foot         { padding: .3rem .7rem .35rem; }
   .hero-solo-price        { font-size: 1.15rem; }
@@ -152,6 +165,7 @@ a    { color: inherit; text-decoration: none; }
   .landing-brand p        { font-size: .8rem; margin-bottom: .3rem; }
   .landing-brand .status-badge { margin-bottom: .45rem; }
   .landing-note           { font-size: .85rem; line-height: 1.35; margin-bottom: .45rem; }
+  .promo-banner           { font-size: .92rem; padding: .45rem .7rem; margin-bottom: .4rem; border-radius: 11px; }
   .hero-solo-stage        { aspect-ratio: 16 / 9; }
   .hero-solo              { margin-bottom: .5rem; }
   .hero-solo-price        { font-size: 1.05rem; }

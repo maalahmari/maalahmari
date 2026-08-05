@@ -95,8 +95,8 @@
           "@type": "MenuSection",
           "name": "بروستد",
           "hasMenuItem": [
-            { "@type": "MenuItem", "name": "بروستد 4 قطع", "offers": { "@type": "Offer", "price": "19", "priceCurrency": "SAR" } },
-            { "@type": "MenuItem", "name": "بروستد 8 قطع", "offers": { "@type": "Offer", "price": "36", "priceCurrency": "SAR" } }
+            { "@type": "MenuItem", "name": "بروستد 4 قطع", "offers": { "@type": "Offer", "price": "17", "priceCurrency": "SAR" } },
+            { "@type": "MenuItem", "name": "بروستد 8 قطع", "offers": { "@type": "Offer", "price": "32", "priceCurrency": "SAR" } }
           ]
         }
       ]
@@ -131,7 +131,13 @@
         <span class="status-badge" id="openStatusLanding"></span>
       </div>
 
-      <p class="landing-note">🏪 نفس أسعار المحل &nbsp;·&nbsp; 🚵 توصيل 5 ريال &nbsp;·&nbsp; ⏱ خلال ~30 دقيقة</p>
+      {# ── PROMO 2026-08-04 → 2026-08-18 ─────────────────────────────────────
+         Free delivery for everyone. To END the promo: delete this banner, put
+         "🚵 توصيل 5 ريال" back in the note below, and restore
+         FREE_DELIVERY_MIN = 50 in BOTH app.py and static/js/app.js. #}
+      <div class="promo-banner">🚚 التوصيل مجاني على كل الطلبات</div>
+
+      <p class="landing-note">🏪 نفس أسعار المحل &nbsp;·&nbsp; 🚚 توصيل مجاني &nbsp;·&nbsp; ⏱ خلال ~30 دقيقة</p>
 
       {# One large rotating meal photo. *_wide.webp are 3:2 crops centred on the
          food — a shared ratio so the box doesn't jump height on each change.
@@ -145,7 +151,7 @@
                alt="وجبة ٢ شاورما" data-name="وجبة شاورمتين مايونيز" data-price="20" />
           <img class="hero-solo-img" loading="eager" decoding="async"
                src="{{ url_for('static', filename=find_image('broasted_meal_wide')) }}"
-               alt="وجبة بروستد" data-name="وجبة بروستد 4 قطع" data-price="22" />
+               alt="وجبة بروستد" data-name="وجبة بروستد 4 قطع" data-price="20" />
           <img class="hero-solo-img" loading="eager" decoding="async"
                src="{{ url_for('static', filename=find_image('meal_family_10_wide')) }}"
                alt="وجبة عائلية ١٠" data-name="وجبة عائلية 10 شاورما مايونيز" data-price="85"
@@ -190,7 +196,8 @@
     <div class="promise-bar">
       <span class="promise-item">🏪 نفس أسعار المحل</span>
       <span class="promise-sep"></span>
-      <span class="promise-item">🚵 توصيل 5 ريال فقط</span>
+      {# PROMO 2026-08-04 → 2026-08-18 — restore "🚵 توصيل 5 ريال فقط" when it ends #}
+      <span class="promise-item"><strong>🚚 توصيل مجاني</strong></span>
       <span class="promise-sep"></span>
       <span class="promise-item">⏱ خلال ~30 دقيقة</span>
     </div>
@@ -444,8 +451,8 @@
             <div class="opt-group">
               <div class="opt-label">الكمية</div>
               <div class="chips" id="broasted-size">
-                <button class="chip active" data-val="4 قطع" data-price="19">4 قطع — 19 ريال</button>
-                <button class="chip"        data-val="8 قطع" data-price="36">8 قطع — 36 ريال</button>
+                <button class="chip active" data-val="4 قطع" data-price="17">4 قطع — 17 ريال</button>
+                <button class="chip"        data-val="8 قطع" data-price="32">8 قطع — 32 ريال</button>
               </div>
             </div>
             <div class="opt-group">
@@ -456,7 +463,7 @@
               </div>
             </div>
             <div class="conf-footer">
-              <span class="conf-price" id="broasted-price">19 ريال</span>
+              <span class="conf-price" id="broasted-price">17 ريال</span>
               <div class="conf-actions">
                 <div class="qty-ctrl">
                   <button onclick="changeCardQty('broasted', -1)">−</button>
@@ -672,12 +679,12 @@
             <div class="opt-group">
               <div class="opt-label">الكمية</div>
               <div class="chips" id="broasted-meal-size">
-                <button class="chip active" data-val="4 قطع" data-price="22">4 قطع — 22 ريال</button>
-                <button class="chip"        data-val="8 قطع" data-price="38">8 قطع — 38 ريال</button>
+                <button class="chip active" data-val="4 قطع" data-price="20">4 قطع — 20 ريال</button>
+                <button class="chip"        data-val="8 قطع" data-price="36">8 قطع — 36 ريال</button>
               </div>
             </div>
             <div class="conf-footer">
-              <span class="conf-price" id="broasted-meal-price">22 ريال</span>
+              <span class="conf-price" id="broasted-meal-price">20 ريال</span>
               <div class="conf-actions">
                 <div class="qty-ctrl">
                   <button onclick="changeCardQty('broasted-meal', -1)">−</button>
