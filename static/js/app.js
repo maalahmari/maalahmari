@@ -284,9 +284,15 @@ function snapScid() {
 // indistinguishable from a walk-in regular — which makes cost-per-order, and
 // therefore any bid decision, unmeasurable.
 //
-// Snapchat appends ?ScCid=<click id> to the landing URL. We store first-touch
-// so a visitor who lands from the ad and orders on a later visit (or after a
-// reload, which drops the query string) still carries the original source.
+// Snapchat appends ?ScCid=<click id> to the landing URL and Google Ads appends
+// ?gclid=<click id>. We store first-touch so a visitor who lands from the ad and
+// orders on a later visit (or after a reload, which drops the query string)
+// still carries the original source.
+//
+// The full click id is kept, not just the network name: it is the only way to
+// tie an order back to one specific click in the server access log, which is
+// what let us catch Snap's dashboard and the log disagreeing on click counts.
+// Group by the prefix before ':' when you just want per-network totals.
 var SOURCE_TTL = 7 * 24 * 60 * 60 * 1000;   // 7 days — Snap's click-attribution window
 
 // The stored ad click, or '' when there is none / it has expired. Kept separate
@@ -306,8 +312,13 @@ function captureSource() {
   try {
     var p   = new URLSearchParams(location.search);
     var src = '';
-    if (p.get('ScCid'))           src = 'snap:' + p.get('ScCid');
-    else if (p.get('utm_source')) src = 'utm:'  + p.get('utm_source');
+    // Click ids beat utm_source when a URL carries both: utm_source would only
+    // repeat the network name, which the prefix already records, while the id
+    // is unrecoverable once dropped. NOTE: Snapchat's parameter is `ScCid` —
+    // `sclid` is not a Snap parameter and would match nothing.
+    if (p.get('ScCid'))           src = 'snap:'   + p.get('ScCid');
+    else if (p.get('gclid'))      src = 'google:' + p.get('gclid');
+    else if (p.get('utm_source')) src = 'utm:'    + p.get('utm_source');
     // First touch wins — we want the source that *acquired* the customer, so a
     // regular who clicks a later ad isn't re-credited to it as a new one.
     if (src && !storedSource()) {
