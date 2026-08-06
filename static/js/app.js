@@ -52,12 +52,13 @@ var MIXED_SURCHARGE = 1;
 var FREE_DELIVERY_MIN   = 0;
 var FREE_DELIVERY_NUDGE = 36;   // don't nudge about free delivery until the cart reaches this
 
-// Delivery geofence (SOFT): we capture the customer's GPS at checkout to attach
-// their location to the order and flag it for staff if it's outside the radius
-// of the FULFILLING branch — but we never block the order. The branch is
-// already resolved by the time we ask for location (hood is picked first).
-var _deliveryCoords = null;          // {lat,lng,outOfRange} once we have a fix (or null)
-var _deliveryLocationChecked = false; // asked for location already this order
+// NOTE: checkout used to request the browser's GPS here to auto-attach coords
+// and flag out-of-radius orders. It was removed 2026-08-06: the prompt fired at
+// the exact moment of highest intent and only 11% of carts reached
+// START_CHECKOUT. The customer sends their pin over WhatsApp anyway, which the
+// order form already promises ("موقعك سيُرسل عبر واتساب بعد التأكيد"), so the
+// prompt bought a duplicate of data we already get. See git history for the
+// removed captureDeliveryLocation/haversineKm if the geofence is ever revived.
 
 // Grocery referral promo code (first order only) — {code, grocery} once the
 // server validates it via /api/promo/check, else null.
@@ -154,7 +155,6 @@ function selectHood(hood, fee) {
   // The hood decides which branch fulfils the order — the customer never
   // picks a branch for delivery. (Server re-derives this; never trusts us.)
   _activeBranch = HOOD_TO_BRANCH[hood] || DEFAULT_BRANCH;
-  _deliveryCoords = null; _deliveryLocationChecked = false;   // re-capture location for this delivery
   DELIVERY = (typeof fee === 'number') ? fee : (window.NEIGHBORHOOD_FEES[hood] || 5);
   document.getElementById('hoodBadge').textContent = hood;
   renderCart();
@@ -193,62 +193,6 @@ function showOutOfRange() {
 
 function closeOutOfRange() {
   document.getElementById('outOfRangeModal').classList.remove('open');
-}
-
-// ── Delivery geofence ────────────────────────
-// Great-circle distance (km) between two lat/lng points.
-function haversineKm(lat1, lng1, lat2, lng2) {
-  var R = 6371;
-  var dLat = (lat2 - lat1) * Math.PI / 180;
-  var dLng = (lng2 - lng1) * Math.PI / 180;
-  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-          Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-// Soft geofence: capture the customer's location if they allow it, then ALWAYS
-// continue via done(). We tag the coords with outOfRange so staff can double-check
-// in the admin panel. Denied / failed / unsupported → just proceed without coords.
-function captureDeliveryLocation(done) {
-  _deliveryLocationChecked = true;
-  if (!navigator.geolocation) { done(); return; }
-
-  var coBtn = document.getElementById('checkoutBtn');
-  var origText = coBtn ? coBtn.textContent : '';
-  if (coBtn) { coBtn.disabled = true; coBtn.textContent = '📍 جاري تحديد موقعك…'; }
-  function restore() { if (coBtn) { coBtn.disabled = false; coBtn.textContent = origText; } }
-
-  // Checkout MUST continue exactly once, whichever path gets here first.
-  var settled = false;
-  function proceed() {
-    if (settled) return;
-    settled = true;
-    clearTimeout(watchdog);
-    restore();
-    done();
-  }
-
-  // In-app browsers (Snapchat, Instagram) can swallow the permission prompt and
-  // then never invoke either callback — the `timeout` option below is not
-  // honoured in that case, so the button would stay disabled forever and the
-  // customer is stranded on the cart. This watchdog is the real guarantee.
-  var watchdog = setTimeout(proceed, 3500);
-
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      if (settled) return;
-      var lat = pos.coords.latitude, lng = pos.coords.longitude;
-      var br = branchInfo(_activeBranch);
-      var dist = haversineKm(lat, lng, br.lat, br.lng);
-      _deliveryCoords = { lat: lat, lng: lng, outOfRange: dist > (br.radius_km || 2.2) };
-      proceed();
-    },
-    proceed,   // denied / failed → carry on without coords (soft geofence)
-    // The fix is only compared against a 2.2 km radius, so network-level accuracy
-    // is plenty, and a short timeout keeps the button responsive.
-    { enableHighAccuracy: false, timeout: 3000, maximumAge: 0 }
-  );
 }
 
 // ── Snap Pixel identity ──────────────────────
@@ -1043,13 +987,6 @@ function openOrderForm() {
     return;
   }
 
-  // Delivery orders: capture the customer's location once (soft — never blocks),
-  // then continue. Pickup skips this.
-  if (!IS_PICKUP && !_deliveryLocationChecked) {
-    captureDeliveryLocation(openOrderForm);
-    return;
-  }
-
   closeCart();
 
   gtagSafe('event', 'begin_checkout', {
@@ -1256,9 +1193,7 @@ async function submitOrder(e) {
         + 'التوصيل: مجاني 🎉 (خصم ' + DELIVERY + ' ريال)\n'
         + 'الإجمالي: ' + grandTotal + ' ريال\n\n'
       : 'الحساب: ' + grandTotal + ' ريال (توصيل ' + fee + ' ريال لحي ' + hood + ').\n\n';
-    var locLine = _deliveryCoords
-      ? '📍 موقعي: https://maps.google.com/?q=' + _deliveryCoords.lat + ',' + _deliveryCoords.lng
-      : '📍 سأرسل موقعي الآن.';
+    var locLine = '📍 سأرسل موقعي الآن.';
     waMsg = 'مرحباً شاورمات 🌯، تم تجهيز طلبي من الموقع.\n'
           + '👤 ' + name + '\n'
           + '📱 ' + phone + '\n'
@@ -1290,12 +1225,9 @@ async function submitOrder(e) {
     // Where this visitor came from — separates ad-driven orders from organic.
     source:       getSource(),
   };
-  // Captured delivery location → store it (admin/track map) + flag if out of zone.
-  if (_deliveryCoords) {
-    payload.lat = _deliveryCoords.lat;
-    payload.lng = _deliveryCoords.lng;
-    payload.out_of_range = !!_deliveryCoords.outOfRange;
-  }
+  // lat/lng/out_of_range are intentionally not sent any more — see the note at
+  // the top of this file. The server still accepts and defaults them, so older
+  // orders keep their coords and the admin map still renders them.
   // Server re-validates this — never trust the client's earlier /api/promo/check.
   if (_appliedPromo) {
     payload.promo_code = _appliedPromo.code;
@@ -1341,7 +1273,6 @@ async function submitOrder(e) {
 
       closeOrderForm();
       Object.keys(cart).forEach(function(k) { delete cart[k]; });
-      _deliveryCoords = null; _deliveryLocationChecked = false;   // next order captures afresh
       // Reset the delivery method to the default (delivery, 5 ريال) so the next
       // order re-confirms delivery vs pickup at checkout rather than silently
       // reusing this order's choice.
