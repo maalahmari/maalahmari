@@ -21,6 +21,9 @@ var _methodChosen = false;
 var _waOpened = false;     // true once WhatsApp opened, to hide re-send button on return
 var _lastAddKey = null;    // last item added — for one-tap undo
 var _lastAddQty = 1;
+// GPS captured for the current delivery order — { lat, lng, outOfRange } once
+// resolved, else null (denied/slow/pickup). See captureDeliveryLocation().
+var _deliveryCoords = null;
 
 // Branch config comes from the server (window.BRANCHES / window.DEFAULT_BRANCH).
 // _activeBranch is resolved at checkout: from the chosen neighborhood for
@@ -52,13 +55,15 @@ var MIXED_SURCHARGE = 1;
 var FREE_DELIVERY_MIN   = 0;
 var FREE_DELIVERY_NUDGE = 36;   // don't nudge about free delivery until the cart reaches this
 
-// NOTE: checkout used to request the browser's GPS here to auto-attach coords
-// and flag out-of-radius orders. It was removed 2026-08-06: the prompt fired at
-// the exact moment of highest intent and only 11% of carts reached
-// START_CHECKOUT. The customer sends their pin over WhatsApp anyway, which the
-// order form already promises ("موقعك سيُرسل عبر واتساب بعد التأكيد"), so the
-// prompt bought a duplicate of data we already get. See git history for the
-// removed captureDeliveryLocation/haversineKm if the geofence is ever revived.
+// NOTE: GPS geofence capture was removed 2026-08-06 — the permission prompt
+// fired synchronously before the order form opened, at the exact moment of
+// highest intent, and only 11% of carts reached START_CHECKOUT. Restored
+// 2026-08-24: captureDeliveryLocation() (see the "GPS Location" section
+// below) is now fired-and-forgotten from openOrderForm() so the form opens
+// immediately and the browser prompt no longer blocks anything — the coords
+// (and in/out-of-range flag) are picked up in submitOrder() only if the
+// browser already answered by then. Works for both branches generically via
+// branchInfo(_activeBranch).
 
 // Grocery referral promo code (first order only) — {code, grocery} once the
 // server validates it via /api/promo/check, else null.
@@ -955,6 +960,49 @@ function initUpsellChips(groupId) {
 
 // ── GPS Location ─────────────────────────────
 
+function haversineKm(lat1, lng1, lat2, lng2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Fire-and-forget: called from openOrderForm() so it never delays the form
+// from opening. If the browser has already answered (grant/deny) by the time
+// submitOrder() runs, we attach coords + an in/out-of-range flag to the
+// order; otherwise we fall back to the old WhatsApp-only flow, same as
+// before this was restored.
+function captureDeliveryLocation() {
+  _deliveryCoords = null;
+  var note = document.getElementById('locationRangeNote');
+  if (note) { note.style.display = 'none'; note.textContent = ''; }
+  if (IS_PICKUP || !navigator.geolocation) return;
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var branch = branchInfo(_activeBranch);
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      var dist = (typeof branch.lat === 'number' && typeof branch.lng === 'number')
+        ? haversineKm(lat, lng, branch.lat, branch.lng)
+        : null;
+      var outOfRange = dist !== null && typeof branch.radius_km === 'number' && dist > branch.radius_km;
+      _deliveryCoords = { lat: lat, lng: lng, outOfRange: outOfRange };
+
+      // Soft warning only — never blocks checkout. The branch still confirms
+      // deliverability over WhatsApp either way.
+      if (outOfRange && note) {
+        note.textContent = '⚠️ يبدو أن موقعك أبعد من نطاق التوصيل المعتاد لهذا الفرع — بنتواصل معك لتأكيد إمكانية التوصيل.';
+        note.style.display = '';
+      }
+    },
+    function() { _deliveryCoords = null; },  // denied / unavailable — fall back silently
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+  );
+}
 
 // ── Order form ────────────────────────────────
 
@@ -988,6 +1036,10 @@ function openOrderForm() {
   }
 
   closeCart();
+
+  // Fire-and-forget — see the "GPS Location" section above. Doesn't delay the
+  // form from opening; submitOrder() only uses it if it resolved in time.
+  captureDeliveryLocation();
 
   gtagSafe('event', 'begin_checkout', {
     currency: 'SAR',
@@ -1193,7 +1245,10 @@ async function submitOrder(e) {
         + 'التوصيل: مجاني 🎉 (خصم ' + DELIVERY + ' ريال)\n'
         + 'الإجمالي: ' + grandTotal + ' ريال\n\n'
       : 'الحساب: ' + grandTotal + ' ريال (توصيل ' + fee + ' ريال لحي ' + hood + ').\n\n';
-    var locLine = '📍 سأرسل موقعي الآن.';
+    var locLine = _deliveryCoords
+      ? '📍 موقعي: https://maps.google.com/?q=' + _deliveryCoords.lat + ',' + _deliveryCoords.lng
+        + (_deliveryCoords.outOfRange ? '\n⚠️ ملاحظة: قد يكون الموقع خارج نطاق التوصيل المعتاد — أفيدونا بالإمكانية.' : '')
+      : '📍 سأرسل موقعي الآن.';
     waMsg = 'مرحباً شاورمات 🌯، تم تجهيز طلبي من الموقع.\n'
           + '👤 ' + name + '\n'
           + '📱 ' + phone + '\n'
@@ -1225,9 +1280,14 @@ async function submitOrder(e) {
     // Where this visitor came from — separates ad-driven orders from organic.
     source:       getSource(),
   };
-  // lat/lng/out_of_range are intentionally not sent any more — see the note at
-  // the top of this file. The server still accepts and defaults them, so older
-  // orders keep their coords and the admin map still renders them.
+  // Attach GPS + in/out-of-range only if captureDeliveryLocation() resolved in
+  // time (see the "GPS Location" section above) — otherwise omitted, same as
+  // when the browser denies/lacks geolocation. Never blocks submission either way.
+  if (_deliveryCoords) {
+    payload.lat          = _deliveryCoords.lat;
+    payload.lng          = _deliveryCoords.lng;
+    payload.out_of_range = !!_deliveryCoords.outOfRange;
+  }
   // Server re-validates this — never trust the client's earlier /api/promo/check.
   if (_appliedPromo) {
     payload.promo_code = _appliedPromo.code;
@@ -1278,6 +1338,7 @@ async function submitOrder(e) {
       // reusing this order's choice.
       _methodChosen = false; IS_PICKUP = false; selectedHood = null; DELIVERY = 5;
       _activeBranch = DEFAULT_BRANCH;
+      _deliveryCoords = null;
       resetPromoState();
       renderCart();
 

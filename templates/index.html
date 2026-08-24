@@ -993,6 +993,10 @@
         <p id="locationNote" style="background:#e8f5e9;color:#1b5e20;border-radius:10px;padding:.7rem .9rem;font-size:.85rem;margin:.25rem 0 .5rem;line-height:1.5">
           📍 موقعك سيُرسل عبر واتساب بعد التأكيد — لا حاجة لكتابة العنوان هنا
         </p>
+        <!-- Filled by captureDeliveryLocation() in app.js only when the resolved
+             GPS point falls outside the branch's delivery radius. Soft warning —
+             never blocks submission. -->
+        <p id="locationRangeNote" style="display:none;background:#fff3e0;color:#b45309;border-radius:10px;padding:.7rem .9rem;font-size:.85rem;margin:.25rem 0 .5rem;line-height:1.5"></p>
         <label>ملاحظات
           <textarea id="custNote" placeholder="أي تعليمات خاصة…" rows="2"></textarea>
         </label>
